@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PawNamics | Trusted Pet Sitting Network</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-content">
+        <a class="logo" href="index.html">PawNamics</a>
+        <nav class="main-nav">
+          <a href="#about">About</a>
+          <a href="#create-profile">Become a Sitter</a>
+          <a href="#questions">Community Q&A</a>
+          <a href="#video-chat">Video Chat</a>
+          <a href="affiliate.html">Affiliates</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="container hero-content">
+          <div>
+            <h1>Care that keeps tails wagging.</h1>
+            <p>
+              PawNamics connects loving pet parents with certified sitters who
+              provide flexible hourly and daily care. Build your sitter profile,
+              browse trusted professionals, and keep in touch with live video
+              chats—all in one place.
+            </p>
+            <div class="hero-actions">
+              <a class="btn" href="#create-profile">Create Sitter Profile</a>
+              <a class="btn btn-outline" href="#available-sitters"
+                >Find a Sitter</a
+              >
+            </div>
+          </div>
+          <img
+            src="https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=700&q=80"
+            alt="Happy dog with sitter"
+          />
+        </div>
+      </section>
+
+      <section id="about" class="section">
+        <div class="container grid two-col">
+          <div>
+            <h2>Why PawNamics?</h2>
+            <p>
+              We are a community-first marketplace designed for modern pet care.
+              Whether you are an experienced sitter or a pet parent searching for
+              reliable care, PawNamics streamlines the experience with
+              transparent pricing, availability tracking, and built-in video
+              chat.
+            </p>
+            <ul class="feature-list">
+              <li>Verified sitter profiles with hourly and daily rates</li>
+              <li>Instant messaging and community Q&amp;A for quick answers</li>
+              <li>One-click video sessions powered by Jitsi Meet</li>
+              <li>Pet parent resources and exclusive affiliate discounts</li>
+            </ul>
+          </div>
+          <div class="card highlight">
+            <h3>For Sitters</h3>
+            <p>
+              Showcase your specialties, set custom rates, and share your
+              availability. PawNamics helps you connect with pet parents that
+              value your expertise.
+            </p>
+            <h3>For Pet Parents</h3>
+            <p>
+              Explore sitter profiles, read community reviews, ask questions,
+              and start a live video call to meet your sitter before booking.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="create-profile" class="section section-alt">
+        <div class="container">
+          <div class="section-header">
+            <h2>Create Your Sitter Profile</h2>
+            <p>
+              Share your experience, set your rates, and highlight your pet care
+              style. Your profile will appear instantly in the sitter directory
+              below.
+            </p>
+          </div>
+          <form id="sitter-form" class="card form-grid" autocomplete="off">
+            <label>
+              Full Name
+              <input type="text" name="name" required placeholder="Jane Doe" />
+            </label>
+            <label>
+              Location
+              <input
+                type="text"
+                name="location"
+                required
+                placeholder="Austin, TX"
+              />
+            </label>
+            <label>
+              Services Offered
+              <input
+                type="text"
+                name="services"
+                required
+                placeholder="Dog walking, Overnight care"
+              />
+            </label>
+            <label>
+              Hourly Rate (USD)
+              <input
+                type="number"
+                name="hourlyRate"
+                min="0"
+                step="1"
+                required
+                placeholder="25"
+              />
+            </label>
+            <label>
+              Daily Rate (USD)
+              <input
+                type="number"
+                name="dailyRate"
+                min="0"
+                step="1"
+                required
+                placeholder="80"
+              />
+            </label>
+            <label class="full">
+              Experience &amp; Bio
+              <textarea
+                name="bio"
+                rows="4"
+                required
+                placeholder="Share your certifications, experience, and what makes your care special."
+              ></textarea>
+            </label>
+            <label>
+              Years of Experience
+              <input
+                type="number"
+                name="experience"
+                min="0"
+                step="1"
+                required
+                placeholder="5"
+              />
+            </label>
+            <label>
+              Available For
+              <select name="availability" required>
+                <option value="Weekdays">Weekdays</option>
+                <option value="Weekends">Weekends</option>
+                <option value="Full-Time">Full-Time</option>
+                <option value="Evenings">Evenings</option>
+              </select>
+            </label>
+            <label>
+              Profile Photo URL
+              <input
+                type="url"
+                name="photo"
+                placeholder="https://example.com/photo.jpg"
+              />
+            </label>
+            <button type="submit" class="btn full">Save Profile</button>
+          </form>
+        </div>
+      </section>
+
+      <section id="available-sitters" class="section">
+        <div class="container">
+          <div class="section-header">
+            <h2>Available Sitters</h2>
+            <p>Browse community-submitted profiles and reach out instantly.</p>
+          </div>
+          <div id="sitter-list" class="card-grid"></div>
+          <p class="note">
+            Tip: Click a sitter to reveal contact options and start a video chat.
+          </p>
+        </div>
+      </section>
+
+      <section id="questions" class="section section-alt">
+        <div class="container two-col">
+          <div>
+            <div class="section-header">
+              <h2>Community Q&amp;A</h2>
+              <p>
+                Ask questions, share tips, and learn from other pet parents and
+                sitters.
+              </p>
+            </div>
+            <form id="question-form" class="card form-grid">
+              <label>
+                Your Name
+                <input type="text" name="author" placeholder="Alex" required />
+              </label>
+              <label class="full">
+                Question
+                <textarea
+                  name="question"
+                  rows="3"
+                  required
+                  placeholder="How do you help a dog with separation anxiety?"
+                ></textarea>
+              </label>
+              <button type="submit" class="btn full">Post Question</button>
+            </form>
+          </div>
+          <div class="card" id="question-board">
+            <h3>Latest Questions</h3>
+            <ul id="questions-list" class="question-list"></ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="video-chat" class="section">
+        <div class="container two-col">
+          <div>
+            <div class="section-header">
+              <h2>Meet Over Video</h2>
+              <p>
+                PawNamics integrates with Jitsi Meet so you can connect face to
+                face before booking. Create a unique room name and share it with
+                your sitter or pet parent.
+              </p>
+            </div>
+            <form id="video-form" class="card form-grid">
+              <label class="full">
+                Meeting Room Name
+                <input
+                  type="text"
+                  name="room"
+                  placeholder="PawNamics-Meetup"
+                  required
+                  pattern="[A-Za-z0-9-]{3,}"
+                />
+              </label>
+              <button type="submit" class="btn full">Start Video Chat</button>
+              <p class="note">
+                Note: Video chat opens in the embedded viewer below using
+                <a href="https://meet.jit.si/" target="_blank">Jitsi Meet</a>.
+              </p>
+            </form>
+          </div>
+          <div class="card video-card">
+            <iframe
+              id="video-frame"
+              title="PawNamics Video Chat"
+              src="https://meet.jit.si/embed/PawNamicsWelcome"
+              allow="camera; microphone; fullscreen; display-capture"
+              loading="lazy"
+            ></iframe>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-content">
+        <div>
+          <a class="logo" href="index.html">PawNamics</a>
+          <p>Connecting pets, parents, and trusted sitters since 2024.</p>
+        </div>
+        <div class="footer-links">
+          <a href="#about">About</a>
+          <a href="#create-profile">Become a Sitter</a>
+          <a href="#questions">Q&amp;A</a>
+          <a href="#video-chat">Video Chat</a>
+          <a href="affiliate.html">Affiliates</a>
+        </div>
+        <p class="copyright">&copy; 2024 PawNamics. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>

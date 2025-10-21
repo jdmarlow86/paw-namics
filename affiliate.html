@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PawNamics Affiliates</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="affiliate-page">
+    <header class="site-header">
+      <div class="container header-content">
+        <a class="logo" href="index.html">PawNamics</a>
+        <nav class="main-nav">
+          <a href="index.html#about">About</a>
+          <a href="index.html#create-profile">Become a Sitter</a>
+          <a href="index.html#questions">Community Q&A</a>
+          <a href="index.html#video-chat">Video Chat</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero affiliate-hero">
+        <div class="container hero-content">
+          <div>
+            <h1>Exclusive Perks for PawNamics Members</h1>
+            <p>
+              Enjoy curated discounts on pet essentials, training resources, and
+              wellness products from our trusted affiliate partners.
+            </p>
+            <a class="btn" href="index.html">Back to PawNamics</a>
+          </div>
+          <img
+            src="https://images.unsplash.com/photo-1541364983171-a8ba01e95cfc?auto=format&fit=crop&w=700&q=80"
+            alt="Dog enjoying treats"
+          />
+        </div>
+      </section>
+
+      <section class="section section-alt">
+        <div class="container">
+          <div class="section-header">
+            <h2>Featured Affiliates</h2>
+            <p>
+              We partner with industry-leading brands that align with our
+              mission: keeping pets happy, healthy, and safe.
+            </p>
+          </div>
+          <div class="card-grid">
+            <article class="card">
+              <h3>Chewy</h3>
+              <p>
+                Stock up on food, toys, and supplies with fast delivery and
+                exclusive PawNamics bundle deals.
+              </p>
+              <a class="btn" href="https://www.chewy.com/" target="_blank"
+                >Shop Chewy</a
+              >
+            </article>
+            <article class="card">
+              <h3>BarkBox</h3>
+              <p>
+                Surprise your pup with themed monthly boxes packed with treats
+                and toys your sitter can use during visits.
+              </p>
+              <a class="btn" href="https://barkbox.com/" target="_blank"
+                >Claim Offer</a
+              >
+            </article>
+            <article class="card">
+              <h3>PetSmart Training</h3>
+              <p>
+                Level up skills with discounted group classes and virtual
+                training from certified experts.
+              </p>
+              <a class="btn" href="https://www.petsmart.com/" target="_blank"
+                >Explore Classes</a
+              >
+            </article>
+            <article class="card">
+              <h3>Healthy Paws Insurance</h3>
+              <p>
+                Protect every furry family member with special rates on
+                comprehensive pet insurance plans.
+              </p>
+              <a class="btn" href="https://www.healthypawspetinsurance.com/" target="_blank"
+                >Get a Quote</a
+              >
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container two-col">
+          <div class="card">
+            <h3>Partner with PawNamics</h3>
+            <p>
+              Have a pet-friendly product or service? Join our affiliate network
+              to reach thousands of dedicated pet lovers and sitters.
+            </p>
+            <ul class="feature-list">
+              <li>Dedicated partner success specialist</li>
+              <li>Spotlight placement on PawNamics</li>
+              <li>Co-branded marketing campaigns</li>
+            </ul>
+          </div>
+          <form id="affiliate-form" class="card form-grid">
+            <h3 class="full">Apply to Become an Affiliate</h3>
+            <label>
+              Company Name
+              <input type="text" name="company" required />
+            </label>
+            <label>
+              Website
+              <input type="url" name="website" required placeholder="https://" />
+            </label>
+            <label>
+              Contact Email
+              <input type="email" name="email" required placeholder="you@brand.com" />
+            </label>
+            <label class="full">
+              Partnership Goals
+              <textarea
+                name="goals"
+                rows="3"
+                required
+                placeholder="Tell us about your products and how you would like to collaborate."
+              ></textarea>
+            </label>
+            <button type="submit" class="btn full">Submit Application</button>
+            <p class="note full">
+              Our partnerships team will follow up within 3 business days with
+              next steps.
+            </p>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-content">
+        <div>
+          <a class="logo" href="index.html">PawNamics</a>
+          <p>Connecting pets, parents, and trusted sitters since 2024.</p>
+        </div>
+        <div class="footer-links">
+          <a href="index.html#about">About</a>
+          <a href="index.html#create-profile">Become a Sitter</a>
+          <a href="index.html#questions">Q&amp;A</a>
+          <a href="index.html#video-chat">Video Chat</a>
+        </div>
+        <p class="copyright">&copy; 2024 PawNamics. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <script>
+      document
+        .getElementById('affiliate-form')
+        ?.addEventListener('submit', function (event) {
+          event.preventDefault();
+          const button = this.querySelector('button');
+          button.disabled = true;
+          button.textContent = 'Application Sent!';
+          this.reset();
+        });
+    </script>
+  </body>
+</html>
