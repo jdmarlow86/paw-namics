@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Become a PawNamics Sitter</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-content">
+        <a class="logo" href="index.html">PawNamics</a>
+        <nav class="main-nav">
+          <a href="index.html">Home</a>
+          <a href="about.html">About</a>
+          <a href="become-a-sitter.html" aria-current="page">Become a Sitter</a>
+          <a href="community-qa.html">Community Q&A</a>
+          <a href="video-chat.html">Video Chat</a>
+          <a href="affiliate.html">Affiliates</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="container hero-content">
+          <div>
+            <h1>Share your expertise with devoted pet parents.</h1>
+            <p>
+              Join the PawNamics sitter network to reach families who value
+              compassionate, professional care. Build a standout profile and make
+              connections that fit your schedule.
+            </p>
+          </div>
+          <img
+            src="https://images.unsplash.com/photo-1601758125946-6ec2e5e47f80?auto=format&fit=crop&w=700&q=80"
+            alt="Pet sitter walking dogs in the park"
+          />
+        </div>
+      </section>
+
+      <section class="section section-alt">
+        <div class="container">
+          <div class="section-header">
+            <h2>Create Your Sitter Profile</h2>
+            <p>
+              Share your experience, set your rates, and highlight your pet care
+              style. Your profile appears instantly in the sitter directory for
+              pet parents to explore.
+            </p>
+          </div>
+          <form id="sitter-form" class="card form-grid" autocomplete="off">
+            <label>
+              Full Name
+              <input type="text" name="name" required placeholder="Jane Doe" />
+            </label>
+            <label>
+              Location
+              <input
+                type="text"
+                name="location"
+                required
+                placeholder="Austin, TX"
+              />
+            </label>
+            <label>
+              Services Offered
+              <input
+                type="text"
+                name="services"
+                required
+                placeholder="Dog walking, Overnight care"
+              />
+            </label>
+            <label>
+              Hourly Rate (USD)
+              <input
+                type="number"
+                name="hourlyRate"
+                min="0"
+                step="1"
+                required
+                placeholder="25"
+              />
+            </label>
+            <label>
+              Daily Rate (USD)
+              <input
+                type="number"
+                name="dailyRate"
+                min="0"
+                step="1"
+                required
+                placeholder="80"
+              />
+            </label>
+            <label class="full">
+              Experience &amp; Bio
+              <textarea
+                name="bio"
+                rows="4"
+                required
+                placeholder="Share your certifications, experience, and what makes your care special."
+              ></textarea>
+            </label>
+            <label>
+              Years of Experience
+              <input
+                type="number"
+                name="experience"
+                min="0"
+                step="1"
+                required
+                placeholder="5"
+              />
+            </label>
+            <label>
+              Available For
+              <select name="availability" required>
+                <option value="Weekdays">Weekdays</option>
+                <option value="Weekends">Weekends</option>
+                <option value="Full-Time">Full-Time</option>
+                <option value="Evenings">Evenings</option>
+              </select>
+            </label>
+            <label>
+              Profile Photo URL
+              <input
+                type="url"
+                name="photo"
+                placeholder="https://example.com/photo.jpg"
+              />
+            </label>
+            <button type="submit" class="btn full">Save Profile</button>
+          </form>
+        </div>
+      </section>
+
+      <section id="available-sitters" class="section">
+        <div class="container">
+          <div class="section-header">
+            <h2>Your Live Directory</h2>
+            <p>
+              Preview how pet parents will see your listing. Update your profile
+              any time to keep details current.
+            </p>
+          </div>
+          <div id="sitter-list" class="card-grid"></div>
+          <p class="note">
+            Tip: Click a sitter to open a ready-to-share video room suggestion.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-content">
+        <div>
+          <a class="logo" href="index.html">PawNamics</a>
+          <p>Connecting pets, parents, and trusted sitters since 2024.</p>
+        </div>
+        <div class="footer-links">
+          <a href="about.html">About</a>
+          <a href="become-a-sitter.html" aria-current="page">Become a Sitter</a>
+          <a href="community-qa.html">Q&amp;A</a>
+          <a href="video-chat.html">Video Chat</a>
+          <a href="affiliate.html">Affiliates</a>
+        </div>
+        <p class="copyright">&copy; 2024 PawNamics. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
