@@ -55,14 +55,22 @@ function createSitterCard(sitter) {
   const button = card.querySelector('button');
   button.addEventListener('click', () => {
     const roomName = `PawNamics-${sitter.name.replace(/\s+/g, '')}`;
-    startVideoChat(roomName);
-    window.scrollTo({ top: document.getElementById('video-chat').offsetTop - 80, behavior: 'smooth' });
+    const videoSection = document.getElementById('video-chat');
+    if (videoFrame && videoSection) {
+      startVideoChat(roomName);
+      videoSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      const url = new URL('video-chat.html', window.location.href);
+      url.searchParams.set('room', roomName);
+      window.location.href = url.toString();
+    }
   });
 
   return card;
 }
 
 function renderSitters(sitters) {
+  if (!sitterList) return;
   sitterList.innerHTML = '';
   if (!sitters.length) {
     const empty = document.createElement('p');
@@ -86,6 +94,7 @@ function createQuestionItem(question) {
 }
 
 function renderQuestions(questions) {
+  if (!questionsList) return;
   questionsList.innerHTML = '';
   if (!questions.length) {
     const empty = document.createElement('li');
@@ -98,6 +107,7 @@ function renderQuestions(questions) {
 }
 
 function startVideoChat(roomName) {
+  if (!videoFrame) return;
   const sanitized = roomName.replace(/[^A-Za-z0-9-]/g, '') || 'PawNamicsWelcome';
   videoFrame.src = `https://meet.jit.si/embed/${sanitized}`;
 }
@@ -143,3 +153,15 @@ videoForm?.addEventListener('submit', (event) => {
   const room = formData.get('room');
   startVideoChat(room);
 });
+
+if (videoFrame) {
+  const params = new URLSearchParams(window.location.search);
+  const requestedRoom = params.get('room');
+  if (requestedRoom) {
+    startVideoChat(requestedRoom);
+    const roomInput = videoForm?.querySelector('input[name="room"]');
+    if (roomInput) {
+      roomInput.value = requestedRoom;
+    }
+  }
+}
