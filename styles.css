@@ -127,6 +127,10 @@ a:focus {
   background: var(--white);
 }
 
+.subscription {
+  background: linear-gradient(180deg, rgba(213, 245, 227, 0.4), rgba(255, 255, 255, 0.8));
+}
+
 .section-header {
   text-align: left;
   margin-bottom: 2rem;
@@ -151,7 +155,7 @@ a:focus {
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
 
-.card {
+.card {   
   background: var(--white);
   border-radius: 1.5rem;
   padding: 2rem;
@@ -167,10 +171,91 @@ a:focus {
   color: rgba(255, 255, 255, 0.9);
 }
 
+.btn-light {
+  background: var(--white);
+  color: var(--green-dark);
+  box-shadow: 0 8px 18px rgba(255, 255, 255, 0.35);
+  border: none;
+}
+
+.btn-light:hover,
+.btn-light:focus {
+  box-shadow: 0 12px 24px rgba(255, 255, 255, 0.45);
+}
+
 .card-grid {
   display: grid;
   gap: 1.5rem;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.subscription-grid {
+  display: grid;
+  gap: 1.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.subscription-card {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.subscription-price {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  font-weight: 600;
+}
+
+.price-amount {
+  font-size: clamp(2.5rem, 4vw, 3rem);
+}
+
+.price-frequency {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.subscription-features {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.subscription-features li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.subscription-features li::before {
+  content: '✔';
+  font-weight: 700;
+  color: currentColor;
+}
+
+.payment-options {
+  display: grid;
+  gap: 1rem;
+}
+
+.payment-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.badge-inverse {
+  background: rgba(20, 140, 59, 0.15);
+  color: var(--green-dark);
+  border: 1px solid rgba(20, 140, 59, 0.25);
+}
+
+.payment-note {
+  color: var(--muted);
+  margin: 0;
 }
 
 .form-grid {
