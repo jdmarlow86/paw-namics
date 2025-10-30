@@ -17,6 +17,18 @@ const profilePets = document.querySelector('[data-profile-pets]');
 const profileExperience = document.querySelector('[data-profile-experience]');
 const profileBio = document.querySelector('[data-profile-bio]');
 const profileMessage = document.querySelector('[data-profile-message]');
+const sitterPhotoInput = sitterForm?.querySelector('input[name="photo"]');
+const sitterPhotoPreview = sitterForm?.querySelector('[data-photo-preview]');
+const sitterPhotoPreviewImage = sitterForm?.querySelector('[data-photo-preview-image]');
+const sitterPhotoPreviewText = sitterForm?.querySelector('[data-photo-preview-text]');
+const sitterPhotoPreviewStatus = sitterForm?.querySelector('[data-photo-preview-status]');
+const sitterPhotoPreviewFilename = sitterForm?.querySelector('[data-photo-preview-filename]');
+const sitterPhotoHelpText =
+  document.getElementById('photo-help')?.textContent?.trim() ||
+  'Upload a square image for the best results.';
+
+const DEFAULT_SITTER_PHOTO =
+  'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80';
 
 const STORAGE_KEYS = {
   SITTERS: 'pawnamics_sitters',
@@ -42,12 +54,72 @@ function saveStoredData(key, value) {
   }
 }
 
+function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.addEventListener('load', () => {
+      resolve(typeof reader.result === 'string' ? reader.result : '');
+    });
+    reader.addEventListener('error', () => {
+      reject(reader.error || new Error('Unable to read file'));
+    });
+    reader.readAsDataURL(file);
+  });
+}
+
+function setSitterPhotoPreview(src, statusText, filenameText, isEmpty) {
+  if (sitterPhotoPreviewImage) {
+    sitterPhotoPreviewImage.src = src || DEFAULT_SITTER_PHOTO;
+  }
+  if (sitterPhotoPreviewStatus) {
+    sitterPhotoPreviewStatus.textContent = statusText || '';
+  }
+  if (sitterPhotoPreviewFilename) {
+    sitterPhotoPreviewFilename.textContent = filenameText || '';
+  }
+  if (sitterPhotoPreview) {
+    sitterPhotoPreview.dataset.photoEmpty = isEmpty ? 'true' : 'false';
+  }
+}
+
+function resetSitterPhotoPreview() {
+  setSitterPhotoPreview(DEFAULT_SITTER_PHOTO, 'No photo selected', '', true);
+  if (sitterPhotoHelpText && sitterPhotoPreviewText) {
+    const help = sitterPhotoPreviewText.querySelector('#photo-help');
+    if (help) {
+      help.textContent = sitterPhotoHelpText;
+    }
+  }
+}
+
+async function updateSitterPhotoPreview(file) {
+  if (!(file instanceof File) || file.size === 0) {
+    resetSitterPhotoPreview();
+    return '';
+  }
+
+  try {
+    const dataUrl = await fileToDataUrl(file);
+    setSitterPhotoPreview(dataUrl, 'Photo ready', file.name, false);
+    return dataUrl;
+  } catch (error) {
+    console.error('Unable to read profile photo', error);
+    resetSitterPhotoPreview();
+    return '';
+  }
+}
+
 function createSitterCard(sitter) {
   const card = document.createElement('article');
   card.className = 'card sitter-card';
+  const photoSource =
+    (typeof sitter.photo === 'string' && sitter.photo.length && sitter.photo) ||
+    (typeof sitter.photoUrl === 'string' && sitter.photoUrl.length && sitter.photoUrl) ||
+    DEFAULT_SITTER_PHOTO;
+
   card.innerHTML = `
     <header>
-      <img src="${sitter.photo || 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80'}" alt="${sitter.name}" />
+      <img src="${photoSource}" alt="${sitter.name}" />
       <div>
         <h3>${sitter.name}</h3>
         <div class="sitter-meta">
@@ -200,6 +272,9 @@ if (sitterFilters) {
 }
 renderQuestions(questions);
 renderProfile(userProfile);
+if (sitterPhotoPreview) {
+  resetSitterPhotoPreview();
+}
 
 if (profileForm && userProfile) {
   const formElements = Array.from(profileForm.elements).filter(
@@ -291,19 +366,61 @@ function renderProfile(profile) {
   }
 }
 
-sitterForm?.addEventListener('submit', (event) => {
+sitterPhotoInput?.addEventListener('change', async () => {
+  const selectedFile = sitterPhotoInput.files?.[0];
+  await updateSitterPhotoPreview(selectedFile);
+});
+
+sitterForm?.addEventListener('submit', async (event) => {
   event.preventDefault();
   const formData = new FormData(sitterForm);
-  const sitter = Object.fromEntries(formData.entries());
-  sitters.unshift({
+
+  const parseNumberField = (name) => {
+    const value = formData.get(name);
+    if (value === null) return null;
+    const number = Number(value);
+    return Number.isFinite(number) ? number : null;
+  };
+
+  const sitter = {
+    name: (formData.get('name') || '').toString().trim(),
+    location: (formData.get('location') || '').toString().trim(),
+    services: (formData.get('services') || '').toString().trim(),
+    bio: (formData.get('bio') || '').toString().trim(),
+    availability: (formData.get('availability') || '').toString().trim(),
+  };
+
+  const hourlyRateNumber = parseNumberField('hourlyRate');
+  const dailyRateNumber = parseNumberField('dailyRate');
+  const experienceNumber = parseNumberField('experience');
+  const photoFile = formData.get('photo');
+  let photoData = '';
+
+  if (photoFile instanceof File && photoFile.size > 0) {
+    try {
+      photoData = await fileToDataUrl(photoFile);
+    } catch (error) {
+      console.error('Unable to read profile photo', error);
+    }
+  }
+
+  const sitterRecord = {
     ...sitter,
-    hourlyRate: Number(sitter.hourlyRate).toFixed(0),
-    dailyRate: Number(sitter.dailyRate).toFixed(0),
-    experience: Number(sitter.experience).toFixed(0),
-  });
+    hourlyRate: Number.isFinite(hourlyRateNumber) ? hourlyRateNumber.toFixed(0) : '',
+    dailyRate: Number.isFinite(dailyRateNumber) ? dailyRateNumber.toFixed(0) : '',
+    experience: Number.isFinite(experienceNumber) ? experienceNumber.toFixed(0) : '',
+    photo: photoData,
+  };
+
+  sitters.unshift(sitterRecord);
   saveStoredData(STORAGE_KEYS.SITTERS, sitters);
   renderSitterDirectory();
   sitterForm.reset();
+  resetSitterPhotoPreview();
+});
+
+sitterForm?.addEventListener('reset', () => {
+  resetSitterPhotoPreview();
 });
 
 questionForm?.addEventListener('submit', (event) => {

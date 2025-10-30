@@ -210,6 +210,67 @@ label {
   color: var(--muted);
 }
 
+.photo-upload {
+  display: grid;
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.photo-preview {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-radius: 1rem;
+  border: 1px dashed rgba(0, 0, 0, 0.15);
+  background: rgba(0, 0, 0, 0.02);
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.photo-preview img {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--green-light);
+}
+
+.photo-preview-text {
+  display: grid;
+  gap: 0.25rem;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.photo-preview-filename {
+  font-size: 0.9rem;
+  color: var(--text);
+  word-break: break-word;
+}
+
+.photo-preview-filename:empty {
+  display: none;
+}
+
+.photo-preview-text p {
+  margin: 0;
+}
+
+.photo-preview[data-photo-empty='true'] {
+  border-style: dashed;
+  border-color: rgba(0, 0, 0, 0.1);
+  background: transparent;
+}
+
+.photo-preview[data-photo-empty='true'] img {
+  opacity: 0.45;
+  filter: grayscale(0.4);
+}
+
+.photo-preview[data-photo-empty='true'] .photo-preview-text strong {
+  color: var(--muted);
+}
+
 input,
 textarea,
 select {
