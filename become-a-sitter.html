@@ -130,13 +130,32 @@
                 <option value="Evenings">Evenings</option>
               </select>
             </label>
-            <label>
-              Profile Photo URL
-              <input
-                type="url"
-                name="photo"
-                placeholder="https://example.com/photo.jpg"
-              />
+            <label class="full">
+              Profile Photo
+              <div class="photo-upload">
+                <input
+                  type="file"
+                  name="photo"
+                  accept="image/*"
+                  aria-describedby="photo-help"
+                />
+                <div
+                  class="photo-preview"
+                  data-photo-preview
+                  data-photo-empty="true"
+                >
+                  <img
+                    src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80"
+                    alt="Selected profile preview"
+                    data-photo-preview-image
+                  />
+                  <div class="photo-preview-text" data-photo-preview-text>
+                    <strong data-photo-preview-status>No photo selected</strong>
+                    <span class="photo-preview-filename" data-photo-preview-filename></span>
+                    <p id="photo-help">Upload a square image for the best results.</p>
+                  </div>
+                </div>
+              </div>
             </label>
             <button type="submit" class="btn full">Save Profile</button>
           </form>
