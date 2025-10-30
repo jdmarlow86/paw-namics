@@ -1,5 +1,6 @@
 const sitterForm = document.getElementById('sitter-form');
 const sitterList = document.getElementById('sitter-list');
+const sitterFilters = document.getElementById('sitter-filters');
 const questionForm = document.getElementById('question-form');
 const questionsList = document.getElementById('questions-list');
 const videoForm = document.getElementById('video-form');
@@ -82,17 +83,75 @@ function createSitterCard(sitter) {
   return card;
 }
 
-function renderSitters(sitters) {
+function renderSitters(sitters, emptyMessage) {
   if (!sitterList) return;
   sitterList.innerHTML = '';
   if (!sitters.length) {
     const empty = document.createElement('p');
     empty.className = 'note';
-    empty.textContent = 'No sitter profiles yet. Be the first to share your services!';
+    empty.textContent =
+      emptyMessage || 'No sitter profiles yet. Be the first to share your services!';
     sitterList.appendChild(empty);
     return;
   }
   sitters.forEach((sitter) => sitterList.appendChild(createSitterCard(sitter)));
+}
+
+function hasActiveSitterFilters() {
+  return Boolean(
+    (activeSitterFilters.location && activeSitterFilters.location.length) ||
+      typeof activeSitterFilters.maxRate === 'number' ||
+      (activeSitterFilters.availability && activeSitterFilters.availability.length)
+  );
+}
+
+function applySitterFilters(list) {
+  if (!Array.isArray(list) || !list.length) return list;
+
+  return list.filter((sitter) => {
+    const sitterLocation = (sitter.location || '').toLowerCase();
+    const matchesLocation = activeSitterFilters.location
+      ? sitterLocation.includes(activeSitterFilters.location)
+      : true;
+
+    const hourlyRate = Number(sitter.hourlyRate);
+    let matchesRate = true;
+    if (typeof activeSitterFilters.maxRate === 'number') {
+      matchesRate =
+        !Number.isFinite(hourlyRate) || hourlyRate <= activeSitterFilters.maxRate;
+    }
+
+    const matchesAvailability = activeSitterFilters.availability
+      ? sitter.availability === activeSitterFilters.availability
+      : true;
+
+    return matchesLocation && matchesRate && matchesAvailability;
+  });
+}
+
+function renderSitterDirectory() {
+  const filteredSitters = applySitterFilters(sitters);
+  const emptyMessage = hasActiveSitterFilters()
+    ? 'No sitters match your filters yet. Try adjusting your search.'
+    : undefined;
+  renderSitters(filteredSitters, emptyMessage);
+}
+
+function updateSitterFilters() {
+  if (!sitterFilters) return;
+
+  const formData = new FormData(sitterFilters);
+  const locationValue = (formData.get('location') || '').toString().trim().toLowerCase();
+  const maxRateRaw = formData.get('maxRate');
+  const maxRateValue = maxRateRaw === null ? '' : maxRateRaw.toString().trim();
+  const parsedMaxRate = maxRateValue === '' ? null : Number(maxRateValue);
+  activeSitterFilters = {
+    location: locationValue,
+    maxRate: Number.isFinite(parsedMaxRate) ? parsedMaxRate : null,
+    availability: (formData.get('availability') || '').toString().trim(),
+  };
+
+  renderSitterDirectory();
 }
 
 function createQuestionItem(question) {
@@ -128,8 +187,17 @@ function startVideoChat(roomName) {
 const sitters = loadStoredData(STORAGE_KEYS.SITTERS);
 const questions = loadStoredData(STORAGE_KEYS.QUESTIONS);
 let userProfile = loadStoredData(STORAGE_KEYS.PROFILE, null);
+let activeSitterFilters = {
+  location: '',
+  maxRate: null,
+  availability: '',
+};
 
-renderSitters(sitters);
+if (sitterFilters) {
+  updateSitterFilters();
+} else {
+  renderSitterDirectory();
+}
 renderQuestions(questions);
 renderProfile(userProfile);
 
@@ -143,6 +211,24 @@ if (profileForm && userProfile) {
     }
   });
 }
+
+sitterFilters?.addEventListener('submit', (event) => {
+  event.preventDefault();
+});
+
+sitterFilters?.addEventListener('input', () => {
+  updateSitterFilters();
+});
+
+sitterFilters?.addEventListener('change', () => {
+  updateSitterFilters();
+});
+
+sitterFilters?.addEventListener('reset', () => {
+  setTimeout(() => {
+    updateSitterFilters();
+  }, 0);
+});
 
 function renderProfile(profile) {
   if (!profileDetails || !profileEmptyState) return;
@@ -216,7 +302,7 @@ sitterForm?.addEventListener('submit', (event) => {
     experience: Number(sitter.experience).toFixed(0),
   });
   saveStoredData(STORAGE_KEYS.SITTERS, sitters);
-  renderSitters(sitters);
+  renderSitterDirectory();
   sitterForm.reset();
 });
 

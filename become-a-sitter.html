@@ -152,6 +152,42 @@
               any time to keep details current.
             </p>
           </div>
+          <form id="sitter-filters" class="card filter-bar" autocomplete="off">
+            <div class="filter-grid">
+              <label>
+                Location
+                <input
+                  type="text"
+                  name="location"
+                  placeholder="Search by city or state"
+                  inputmode="search"
+                />
+              </label>
+              <label>
+                Max hourly rate
+                <input
+                  type="number"
+                  name="maxRate"
+                  min="0"
+                  step="1"
+                  placeholder="Any"
+                />
+              </label>
+              <label>
+                Availability
+                <select name="availability">
+                  <option value="">Any availability</option>
+                  <option value="Weekdays">Weekdays</option>
+                  <option value="Weekends">Weekends</option>
+                  <option value="Full-Time">Full-Time</option>
+                  <option value="Evenings">Evenings</option>
+                </select>
+              </label>
+            </div>
+            <div class="filter-actions">
+              <button type="reset" class="btn btn-outline">Clear filters</button>
+            </div>
+          </form>
           <div id="sitter-list" class="card-grid"></div>
           <p class="note">
             Tip: Click a sitter to open a ready-to-share video room suggestion.
