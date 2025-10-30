@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sitter Profile | PawNamics</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-content">
+        <a class="logo" href="index.html">PawNamics</a>
+        <nav class="main-nav">
+          <a href="index.html">Home</a>
+          <a href="about.html">About</a>
+          <a href="become-a-sitter.html">Become a Sitter</a>
+          <a href="community-qa.html">Community Q&A</a>
+          <a href="video-chat.html">Video Chat</a>
+          <a href="affiliate.html">Affiliates</a>
+          <a href="profile.html">Profile</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero sitter-profile-hero" data-sitter-hero>
+        <div class="container sitter-hero-content">
+          <div class="sitter-hero-copy">
+            <a class="back-link" href="index.html#available-sitters">← Back to sitter directory</a>
+            <span class="badge">Serving <span data-sitter-location>your area</span></span>
+            <h1 data-sitter-name>Meet your next PawNamics sitter</h1>
+            <p class="hero-subheading" data-sitter-services>
+              Dedicated pet care services tailored to your household.
+            </p>
+            <div class="hero-meta">
+              <span class="badge" data-sitter-availability>Availability posted soon</span>
+              <span class="badge" data-sitter-experience>Experience shared soon</span>
+            </div>
+            <button class="btn btn-outline" type="button" data-sitter-video>
+              Start a video chat intro
+            </button>
+          </div>
+          <figure class="sitter-hero-photo">
+            <img
+              src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80"
+              alt="Featured sitter"
+              data-sitter-photo
+            />
+          </figure>
+        </div>
+      </section>
+
+      <section class="section" data-sitter-profile>
+        <div class="container sitter-profile-grid">
+          <article class="card sitter-profile-details">
+            <h2>About <span data-sitter-name-short>your sitter</span></h2>
+            <p class="profile-bio" data-sitter-bio>
+              This sitter is preparing a heartfelt introduction. Check back for more details soon.
+            </p>
+            <dl class="profile-meta">
+              <div>
+                <dt>Location</dt>
+                <dd data-sitter-location-detail>Location coming soon</dd>
+              </div>
+              <div>
+                <dt>Availability</dt>
+                <dd data-sitter-availability>Availability posted soon</dd>
+              </div>
+              <div>
+                <dt>Experience</dt>
+                <dd data-sitter-experience>Experience shared soon</dd>
+              </div>
+            </dl>
+            <div class="profile-rates">
+              <h3>Care rates</h3>
+              <p data-sitter-rates>Rates to be discussed with the sitter.</p>
+            </div>
+          </article>
+
+          <aside class="card subscription-card" data-subscription-card>
+            <h2>Book a recurring plan</h2>
+            <p class="subscription-intro">
+              Secure ongoing support with simple subscription billing. Your sitter is notified instantly and will confirm details with you.
+            </p>
+            <form class="subscription-form" data-subscription-form autocomplete="off">
+              <fieldset class="plan-options">
+                <legend>Choose your plan</legend>
+                <label class="plan-option">
+                  <input
+                    type="radio"
+                    name="plan"
+                    value="weekly"
+                    data-plan-option
+                    data-plan-label="Weekly walks"
+                    data-plan-interval="week"
+                    data-plan-price="59"
+                    checked
+                  />
+                  <div>
+                    <strong>Weekly walks</strong>
+                    <p>Up to 2 neighborhood walks each week.</p>
+                    <span class="plan-price">$59/week</span>
+                  </div>
+                </label>
+                <label class="plan-option">
+                  <input
+                    type="radio"
+                    name="plan"
+                    value="weekend"
+                    data-plan-option
+                    data-plan-label="Weekend stay"
+                    data-plan-interval="weekend"
+                    data-plan-price="129"
+                  />
+                  <div>
+                    <strong>Weekend stay</strong>
+                    <p>Friday evening through Sunday night coverage.</p>
+                    <span class="plan-price">$129/weekend</span>
+                  </div>
+                </label>
+                <label class="plan-option">
+                  <input
+                    type="radio"
+                    name="plan"
+                    value="monthly"
+                    data-plan-option
+                    data-plan-label="Monthly companion"
+                    data-plan-interval="month"
+                    data-plan-price="399"
+                  />
+                  <div>
+                    <strong>Monthly companion</strong>
+                    <p>Four custom visits plus on-call messaging.</p>
+                    <span class="plan-price">$399/month</span>
+                  </div>
+                </label>
+              </fieldset>
+
+              <label>
+                Pet parent name
+                <input type="text" name="subscriberName" placeholder="Alex Morgan" required />
+              </label>
+              <label>
+                Email for confirmations
+                <input type="email" name="subscriberEmail" placeholder="alex@email.com" required />
+              </label>
+              <label>
+                Preferred payment method
+                <select name="paymentMethod">
+                  <option value="visa">Visa ending in 4242</option>
+                  <option value="mastercard">Mastercard ending in 8181</option>
+                  <option value="amex">American Express ending in 0005</option>
+                  <option value="ach">Bank transfer (ACH)</option>
+                </select>
+              </label>
+
+              <div class="subscription-summary">
+                <span>Total due today</span>
+                <strong data-subscription-total>$59.00 per week</strong>
+              </div>
+
+              <button type="submit" class="btn full">Subscribe securely</button>
+              <p class="note hidden" data-subscription-message></p>
+            </form>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section hidden" data-sitter-empty>
+        <div class="container">
+          <div class="card empty-state">
+            <h2>We couldn’t find that sitter.</h2>
+            <p>
+              Double-check your link or head back to the directory to explore more pet care pros. Ready to build your own listing?
+            </p>
+            <div class="card-actions">
+              <a class="btn" href="index.html#available-sitters">Browse sitters</a>
+              <a class="btn btn-outline" href="become-a-sitter.html">Create a profile</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-content">
+        <div>
+          <a class="logo" href="index.html">PawNamics</a>
+          <p>Connecting pets, parents, and trusted sitters since 2024.</p>
+        </div>
+        <div class="footer-links">
+          <a href="about.html">About</a>
+          <a href="become-a-sitter.html">Become a Sitter</a>
+          <a href="community-qa.html">Q&amp;A</a>
+          <a href="video-chat.html">Video Chat</a>
+          <a href="affiliate.html">Affiliates</a>
+          <a href="profile.html">Profile</a>
+        </div>
+        <p class="copyright">&copy; 2024 PawNamics. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
