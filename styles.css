@@ -131,6 +131,41 @@ a:focus {
   background: linear-gradient(180deg, rgba(213, 245, 227, 0.4), rgba(255, 255, 255, 0.8));
 }
 
+.newsletter {
+  background: linear-gradient(120deg, rgba(213, 245, 227, 0.3), rgba(255, 255, 255, 0.9));
+}
+
+.newsletter-card {
+  background: var(--white);
+  border-radius: 1.75rem;
+  padding: clamp(2rem, 4vw, 3rem);
+  box-shadow: 0 20px 45px rgba(17, 87, 36, 0.1);
+  display: grid;
+  gap: 2rem;
+  align-items: center;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.newsletter-copy {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.newsletter-form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.newsletter-form .btn {
+  width: fit-content;
+}
+
+.newsletter-note {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
 .section-header {
   text-align: left;
   margin-bottom: 2rem;
