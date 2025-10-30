@@ -17,6 +17,26 @@ const profilePets = document.querySelector('[data-profile-pets]');
 const profileExperience = document.querySelector('[data-profile-experience]');
 const profileBio = document.querySelector('[data-profile-bio]');
 const profileMessage = document.querySelector('[data-profile-message]');
+const sitterProfileHero = document.querySelector('[data-sitter-hero]');
+const sitterProfileSection = document.querySelector('[data-sitter-profile]');
+const sitterProfileEmpty = document.querySelector('[data-sitter-empty]');
+const sitterNameElements = document.querySelectorAll('[data-sitter-name]');
+const sitterNameShortElements = document.querySelectorAll('[data-sitter-name-short]');
+const sitterLocationElements = document.querySelectorAll('[data-sitter-location]');
+const sitterLocationDetail = document.querySelector('[data-sitter-location-detail]');
+const sitterAvailabilityElement = document.querySelector('[data-sitter-availability]');
+const sitterExperienceElement = document.querySelector('[data-sitter-experience]');
+const sitterServicesElement = document.querySelector('[data-sitter-services]');
+const sitterBioElement = document.querySelector('[data-sitter-bio]');
+const sitterPhotoElement = document.querySelector('[data-sitter-photo]');
+const sitterRatesElement = document.querySelector('[data-sitter-rates]');
+const sitterVideoButton = document.querySelector('[data-sitter-video]');
+const subscriptionForm = document.querySelector('[data-subscription-form]');
+const subscriptionTotal = document.querySelector('[data-subscription-total]');
+const subscriptionMessage = document.querySelector('[data-subscription-message]');
+const subscriptionPlanInputs = subscriptionForm
+  ? Array.from(subscriptionForm.querySelectorAll('[data-plan-option]'))
+  : [];
 const sitterPhotoInput = sitterForm?.querySelector('input[name="photo"]');
 const sitterPhotoPreview = sitterForm?.querySelector('[data-photo-preview]');
 const sitterPhotoPreviewImage = sitterForm?.querySelector('[data-photo-preview-image]');
@@ -30,11 +50,23 @@ const sitterPhotoHelpText =
 const DEFAULT_SITTER_PHOTO =
   'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80';
 
+const DEFAULT_SITTER_HERO =
+  'https://images.unsplash.com/photo-1525253086316-d0c936c814f8?auto=format&fit=crop&w=1200&q=80';
+
 const STORAGE_KEYS = {
   SITTERS: 'pawnamics_sitters',
   QUESTIONS: 'pawnamics_questions',
   PROFILE: 'pawnamics_user_profile',
+  SUBSCRIPTIONS: 'pawnamics_sitter_subscriptions',
 };
+
+function generateId(prefix = 'id') {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return `${prefix}-${crypto.randomUUID()}`;
+  }
+  const random = Math.random().toString(16).slice(2, 10);
+  return `${prefix}-${Date.now().toString(36)}-${random}`;
+}
 
 function loadStoredData(key, defaultValue = []) {
   try {
@@ -109,13 +141,31 @@ async function updateSitterPhotoPreview(file) {
   }
 }
 
+function ensureSitterIdentifier(sitter) {
+  if (!sitter || typeof sitter !== 'object') return sitter;
+  if (!sitter.id || typeof sitter.id !== 'string' || sitter.id.trim().length === 0) {
+    sitter.id = generateId('sitter');
+  }
+  return sitter;
+}
+
 function createSitterCard(sitter) {
+  ensureSitterIdentifier(sitter);
   const card = document.createElement('article');
   card.className = 'card sitter-card';
   const photoSource =
     (typeof sitter.photo === 'string' && sitter.photo.length && sitter.photo) ||
     (typeof sitter.photoUrl === 'string' && sitter.photoUrl.length && sitter.photoUrl) ||
     DEFAULT_SITTER_PHOTO;
+
+  const hourlyRateText = sitter.hourlyRate ? `$${sitter.hourlyRate}/hr` : 'Hourly TBD';
+  const dailyRateText = sitter.dailyRate ? `$${sitter.dailyRate}/day` : 'Daily TBD';
+  const experienceText = sitter.experience
+    ? `${sitter.experience} yrs experience`
+    : 'Experience shared soon';
+
+  const profileUrl = new URL('sitter-profile.html', window.location.href);
+  profileUrl.searchParams.set('id', sitter.id);
 
   card.innerHTML = `
     <header>
@@ -125,21 +175,24 @@ function createSitterCard(sitter) {
         <div class="sitter-meta">
           <span class="badge">${sitter.location}</span>
           <span class="badge">${sitter.availability}</span>
-          <span>${sitter.experience} yrs experience</span>
+          <span>${experienceText}</span>
         </div>
       </div>
     </header>
     <p class="details">${sitter.bio}</p>
     <div class="sitter-meta">
-      <span class="rates">💲$${sitter.hourlyRate}/hr</span>
-      <span class="rates">🏡 $${sitter.dailyRate}/day</span>
+      <span class="rates">💲 ${hourlyRateText}</span>
+      <span class="rates">🏡 ${dailyRateText}</span>
     </div>
     <p class="details"><strong>Services:</strong> ${sitter.services}</p>
-    <button class="btn btn-outline" type="button">Start Video Chat</button>
+    <div class="card-actions">
+      <a class="btn" data-view-profile href="${profileUrl.toString()}">View Profile</a>
+      <button class="btn btn-outline" type="button">Start Video Chat</button>
+    </div>
   `;
 
-  const button = card.querySelector('button');
-  button.addEventListener('click', () => {
+  const videoButton = card.querySelector('button');
+  videoButton.addEventListener('click', () => {
     const roomName = `PawNamics-${sitter.name.replace(/\s+/g, '')}`;
     const videoSection = document.getElementById('video-chat');
     if (videoFrame && videoSection) {
@@ -256,14 +309,173 @@ function startVideoChat(roomName) {
   videoFrame.src = `https://meet.jit.si/embed/${sanitized}`;
 }
 
+function setElementTextContent(elements, value, fallback = '') {
+  const text = value && value.length ? value : fallback;
+  elements.forEach((element) => {
+    if (element) {
+      element.textContent = text;
+    }
+  });
+}
+
+function updateSubscriptionSummary() {
+  if (!subscriptionTotal || !subscriptionPlanInputs.length) return;
+  const activePlan = subscriptionPlanInputs.find((input) => input.checked) ||
+    subscriptionPlanInputs[0];
+  if (!activePlan) return;
+  const price = Number(activePlan.dataset.planPrice || '0');
+  const interval = activePlan.dataset.planInterval || 'month';
+  subscriptionTotal.textContent = `$${price.toFixed(2)} per ${interval}`;
+}
+
+function toggleSitterProfileVisibility(showProfile) {
+  if (!sitterProfileSection || !sitterProfileEmpty) return;
+  if (showProfile) {
+    sitterProfileSection.classList.remove('hidden');
+    sitterProfileEmpty.classList.add('hidden');
+    sitterProfileHero?.classList.remove('hidden');
+  } else {
+    sitterProfileSection.classList.add('hidden');
+    sitterProfileEmpty.classList.remove('hidden');
+    sitterProfileHero?.classList.add('hidden');
+  }
+}
+
+function renderSitterProfilePage() {
+  if (!sitterProfileSection) return;
+
+  const params = new URLSearchParams(window.location.search);
+  const sitterId = params.get('id');
+
+  if (!sitterId) {
+    toggleSitterProfileVisibility(false);
+    activeSitterProfileId = null;
+    activeSitterProfileName = '';
+    if (typeof document !== 'undefined') {
+      document.title = 'Sitter Profile | PawNamics';
+    }
+    return;
+  }
+
+  const sitter = sitters.find((entry) => entry.id === sitterId);
+
+  if (!sitter) {
+    toggleSitterProfileVisibility(false);
+    activeSitterProfileId = null;
+    activeSitterProfileName = '';
+    if (typeof document !== 'undefined') {
+      document.title = 'Sitter Profile | PawNamics';
+    }
+    return;
+  }
+
+  toggleSitterProfileVisibility(true);
+  ensureSitterIdentifier(sitter);
+  activeSitterProfileId = sitter.id;
+  activeSitterProfileName = sitter.name || 'PawNamics Sitter';
+
+  if (subscriptionMessage) {
+    subscriptionMessage.classList.add('hidden');
+    subscriptionMessage.textContent = '';
+  }
+
+  const sitterName = sitter.name || 'PawNamics Sitter';
+  const sitterLocation = sitter.location || 'Location coming soon';
+  const sitterAvailability = sitter.availability || 'Availability varies';
+  const sitterExperience = sitter.experience
+    ? `${sitter.experience} years of experience`
+    : 'Experience shared soon';
+  const sitterServices = sitter.services || 'Services will be listed soon.';
+  const sitterBio = sitter.bio ||
+    'This sitter will update their bio shortly. Check back for more details!';
+
+  const sitterHourly = sitter.hourlyRate ? `$${sitter.hourlyRate}/hr` : '';
+  const sitterDaily = sitter.dailyRate ? `$${sitter.dailyRate}/day` : '';
+  const ratesText = [sitterHourly, sitterDaily].filter(Boolean).join(' • ') ||
+    'Rates to be discussed with the sitter.';
+
+  setElementTextContent(sitterNameElements, sitterName, 'PawNamics Sitter');
+  setElementTextContent(sitterNameShortElements, sitterName.split(' ')[0] || sitterName);
+  setElementTextContent(sitterLocationElements, sitterLocation, 'Location coming soon');
+
+  if (sitterLocationDetail) {
+    sitterLocationDetail.textContent = sitterLocation;
+  }
+  if (sitterAvailabilityElement) {
+    sitterAvailabilityElement.textContent = sitterAvailability;
+  }
+  if (sitterExperienceElement) {
+    sitterExperienceElement.textContent = sitterExperience;
+  }
+  if (sitterServicesElement) {
+    sitterServicesElement.textContent = sitterServices;
+  }
+  if (sitterBioElement) {
+    sitterBioElement.textContent = sitterBio;
+  }
+  if (sitterRatesElement) {
+    sitterRatesElement.textContent = ratesText;
+  }
+
+  const sitterPhotoSource =
+    (typeof sitter.photo === 'string' && sitter.photo.length && sitter.photo) ||
+    (typeof sitter.photoUrl === 'string' && sitter.photoUrl.length && sitter.photoUrl) ||
+    DEFAULT_SITTER_PHOTO;
+
+  if (sitterPhotoElement) {
+    sitterPhotoElement.src = sitterPhotoSource;
+    sitterPhotoElement.alt = `${sitterName}'s profile photo`;
+  }
+
+  if (sitterProfileHero) {
+    const heroPhoto =
+      sitter.photo && sitter.photo.length ? sitter.photo : DEFAULT_SITTER_HERO;
+    sitterProfileHero.style.setProperty(
+      '--sitter-hero-image',
+      `url("${heroPhoto}")`
+    );
+  }
+
+  if (sitterVideoButton) {
+    const roomName = `PawNamics-${sitterName.replace(/\s+/g, '')}`;
+    sitterVideoButton.addEventListener('click', () => {
+      const url = new URL('video-chat.html', window.location.href);
+      url.searchParams.set('room', roomName);
+      window.location.href = url.toString();
+    }, { once: true });
+  }
+
+  if (typeof document !== 'undefined' && sitterName.length) {
+    document.title = `${sitterName} | PawNamics Sitter`;
+  }
+
+  updateSubscriptionSummary();
+}
+
 const sitters = loadStoredData(STORAGE_KEYS.SITTERS);
 const questions = loadStoredData(STORAGE_KEYS.QUESTIONS);
+const subscriptions = loadStoredData(STORAGE_KEYS.SUBSCRIPTIONS);
 let userProfile = loadStoredData(STORAGE_KEYS.PROFILE, null);
 let activeSitterFilters = {
   location: '',
   maxRate: null,
   availability: '',
 };
+let activeSitterProfileId = null;
+let activeSitterProfileName = '';
+
+let sitterDataUpdated = false;
+sitters.forEach((entry) => {
+  const originalId = entry.id;
+  ensureSitterIdentifier(entry);
+  if (originalId !== entry.id) {
+    sitterDataUpdated = true;
+  }
+});
+
+if (sitterDataUpdated) {
+  saveStoredData(STORAGE_KEYS.SITTERS, sitters);
+}
 
 if (sitterFilters) {
   updateSitterFilters();
@@ -272,6 +484,7 @@ if (sitterFilters) {
 }
 renderQuestions(questions);
 renderProfile(userProfile);
+renderSitterProfilePage();
 if (sitterPhotoPreview) {
   resetSitterPhotoPreview();
 }
@@ -371,6 +584,81 @@ sitterPhotoInput?.addEventListener('change', async () => {
   await updateSitterPhotoPreview(selectedFile);
 });
 
+if (subscriptionPlanInputs.length) {
+  subscriptionPlanInputs.forEach((input) => {
+    input.addEventListener('change', () => {
+      if (subscriptionMessage) {
+        subscriptionMessage.classList.add('hidden');
+      }
+      updateSubscriptionSummary();
+    });
+  });
+}
+
+subscriptionForm?.addEventListener('submit', (event) => {
+  event.preventDefault();
+  if (subscriptionMessage) {
+    subscriptionMessage.classList.add('hidden');
+  }
+  if (!activeSitterProfileId) {
+    if (subscriptionMessage) {
+      subscriptionMessage.classList.remove('hidden');
+      subscriptionMessage.textContent =
+        'We were unable to locate this sitter profile. Please refresh and try again.';
+    }
+    return;
+  }
+
+  const formData = new FormData(subscriptionForm);
+  const selectedPlan = formData.get('plan');
+  const subscriberName = (formData.get('subscriberName') || '').toString().trim();
+  const subscriberEmail = (formData.get('subscriberEmail') || '').toString().trim();
+  const paymentMethod = (formData.get('paymentMethod') || '').toString().trim();
+
+  if (!subscriberName || !subscriberEmail || !selectedPlan) {
+    if (subscriptionMessage) {
+      subscriptionMessage.classList.remove('hidden');
+      subscriptionMessage.textContent =
+        'Please complete your name, email, and select a plan to continue.';
+    }
+    return;
+  }
+
+  const planInput = subscriptionPlanInputs.find((input) => input.value === selectedPlan);
+  const planLabel = planInput?.dataset.planLabel || 'Custom care plan';
+  const planInterval = planInput?.dataset.planInterval || 'month';
+  const planPrice = Number(planInput?.dataset.planPrice || '0');
+
+  const subscriptionRecord = {
+    id: generateId('subscription'),
+    sitterId: activeSitterProfileId,
+    sitterName: activeSitterProfileName,
+    plan: selectedPlan,
+    planLabel,
+    planInterval,
+    amount: planPrice,
+    subscriberName,
+    subscriberEmail,
+    paymentMethod,
+    createdAt: new Date().toISOString(),
+  };
+
+  subscriptions.unshift(subscriptionRecord);
+  saveStoredData(STORAGE_KEYS.SUBSCRIPTIONS, subscriptions);
+
+  if (subscriptionMessage) {
+    subscriptionMessage.classList.remove('hidden');
+    const sitterNameDisplay = activeSitterProfileName || 'your sitter';
+    subscriptionMessage.textContent = `You're subscribed to ${planLabel} with ${sitterNameDisplay}. We'll send a confirmation to ${subscriberEmail} for ${subscriberName}.`;
+  }
+
+  subscriptionForm.reset();
+  if (subscriptionPlanInputs[0]) {
+    subscriptionPlanInputs[0].checked = true;
+  }
+  updateSubscriptionSummary();
+});
+
 sitterForm?.addEventListener('submit', async (event) => {
   event.preventDefault();
   const formData = new FormData(sitterForm);
@@ -405,6 +693,7 @@ sitterForm?.addEventListener('submit', async (event) => {
   }
 
   const sitterRecord = {
+    id: generateId('sitter'),
     ...sitter,
     hourlyRate: Number.isFinite(hourlyRateNumber) ? hourlyRateNumber.toFixed(0) : '',
     dailyRate: Number.isFinite(dailyRateNumber) ? dailyRateNumber.toFixed(0) : '',
@@ -417,6 +706,10 @@ sitterForm?.addEventListener('submit', async (event) => {
   renderSitterDirectory();
   sitterForm.reset();
   resetSitterPhotoPreview();
+
+  const profileUrl = new URL('sitter-profile.html', window.location.href);
+  profileUrl.searchParams.set('id', sitterRecord.id);
+  window.location.href = profileUrl.toString();
 });
 
 sitterForm?.addEventListener('reset', () => {
