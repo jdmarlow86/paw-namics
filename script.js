@@ -37,6 +37,7 @@ const subscriptionMessage = document.querySelector('[data-subscription-message]'
 const subscriptionPlanInputs = subscriptionForm
   ? Array.from(subscriptionForm.querySelectorAll('[data-plan-option]'))
   : [];
+const navigationToggles = document.querySelectorAll('[data-nav-toggle]');
 const sitterPhotoInput = sitterForm?.querySelector('input[name="photo"]');
 const sitterPhotoPreview = sitterForm?.querySelector('[data-photo-preview]');
 const sitterPhotoPreviewImage = sitterForm?.querySelector('[data-photo-preview-image]');
@@ -59,6 +60,81 @@ const STORAGE_KEYS = {
   PROFILE: 'pawnamics_user_profile',
   SUBSCRIPTIONS: 'pawnamics_sitter_subscriptions',
 };
+
+function initializeNavigation() {
+  if (!navigationToggles.length) {
+    return;
+  }
+
+  const navQuery = window.matchMedia('(max-width: 720px)');
+
+  navigationToggles.forEach((toggle) => {
+    const navId = toggle.getAttribute('aria-controls');
+    const nav = navId ? document.getElementById(navId) : null;
+
+    if (!nav) {
+      return;
+    }
+
+    nav.dataset.navInitialized = 'true';
+
+    const setExpanded = (expanded) => {
+      toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+      nav.classList.toggle('is-open', expanded);
+      nav.setAttribute('aria-hidden', expanded ? 'false' : 'true');
+    };
+
+    const collapseNav = () => {
+      setExpanded(false);
+    };
+
+    const handleMediaChange = (event) => {
+      if (event.matches) {
+        collapseNav();
+      } else {
+        nav.classList.remove('is-open');
+        nav.removeAttribute('aria-hidden');
+        toggle.setAttribute('aria-expanded', 'false');
+      }
+    };
+
+    toggle.addEventListener('click', () => {
+      if (!navQuery.matches) {
+        return;
+      }
+      const expanded = toggle.getAttribute('aria-expanded') === 'true';
+      setExpanded(!expanded);
+    });
+
+    nav.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', () => {
+        if (navQuery.matches) {
+          collapseNav();
+        }
+      });
+    });
+
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && navQuery.matches) {
+        const expanded = toggle.getAttribute('aria-expanded') === 'true';
+        if (expanded) {
+          collapseNav();
+          toggle.focus();
+        }
+      }
+    });
+
+    if (typeof navQuery.addEventListener === 'function') {
+      navQuery.addEventListener('change', handleMediaChange);
+    } else if (typeof navQuery.addListener === 'function') {
+      navQuery.addListener(handleMediaChange);
+    }
+
+    handleMediaChange(navQuery);
+  });
+}
+
+initializeNavigation();
 
 function generateId(prefix = 'id') {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
