@@ -38,6 +38,13 @@ const subscriptionPlanInputs = subscriptionForm
   ? Array.from(subscriptionForm.querySelectorAll('[data-plan-option]'))
   : [];
 const navigationToggles = document.querySelectorAll('[data-nav-toggle]');
+const themeToggle = document.querySelector('[data-theme-toggle]');
+const themeToggleIcon = themeToggle?.querySelector('[data-theme-toggle-icon]');
+const themeToggleLabel = themeToggle?.querySelector('[data-theme-toggle-label]');
+const prefersDarkScheme =
+  typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+    ? window.matchMedia('(prefers-color-scheme: dark)')
+    : null;
 const sitterPhotoInput = sitterForm?.querySelector('input[name="photo"]');
 const sitterPhotoPreview = sitterForm?.querySelector('[data-photo-preview]');
 const sitterPhotoPreviewImage = sitterForm?.querySelector('[data-photo-preview-image]');
@@ -59,6 +66,7 @@ const STORAGE_KEYS = {
   QUESTIONS: 'pawnamics_questions',
   PROFILE: 'pawnamics_user_profile',
   SUBSCRIPTIONS: 'pawnamics_sitter_subscriptions',
+  THEME: 'pawnamics_theme',
 };
 
 function initializeNavigation() {
@@ -135,6 +143,69 @@ function initializeNavigation() {
 }
 
 initializeNavigation();
+initializeTheme();
+
+function initializeTheme() {
+  const getStoredTheme = () => {
+    const storedTheme = loadStoredData(STORAGE_KEYS.THEME, null);
+    return storedTheme === 'light' || storedTheme === 'dark' ? storedTheme : null;
+  };
+
+  const updateToggle = (theme) => {
+    if (!themeToggle) {
+      return;
+    }
+    const isDark = theme === 'dark';
+    themeToggle.setAttribute('aria-pressed', isDark ? 'true' : 'false');
+    themeToggle.setAttribute(
+      'aria-label',
+      isDark ? 'Switch to light mode' : 'Switch to dark mode'
+    );
+    if (themeToggleIcon) {
+      themeToggleIcon.textContent = isDark ? '🌞' : '🌙';
+    }
+    if (themeToggleLabel) {
+      themeToggleLabel.textContent = isDark ? 'Light mode' : 'Dark mode';
+    }
+  };
+
+  let activeTheme =
+    getStoredTheme() || (prefersDarkScheme && prefersDarkScheme.matches ? 'dark' : 'light');
+
+  const applyTheme = (theme, { persist } = { persist: false }) => {
+    const normalizedTheme = theme === 'dark' ? 'dark' : 'light';
+    document.documentElement.dataset.theme = normalizedTheme;
+    updateToggle(normalizedTheme);
+    activeTheme = normalizedTheme;
+    if (persist) {
+      saveStoredData(STORAGE_KEYS.THEME, normalizedTheme);
+    }
+  };
+
+  applyTheme(activeTheme);
+
+  if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+      const nextTheme = activeTheme === 'dark' ? 'light' : 'dark';
+      applyTheme(nextTheme, { persist: true });
+    });
+  }
+
+  if (prefersDarkScheme) {
+    const handleSystemThemeChange = (event) => {
+      if (getStoredTheme()) {
+        return;
+      }
+      applyTheme(event.matches ? 'dark' : 'light');
+    };
+
+    if (typeof prefersDarkScheme.addEventListener === 'function') {
+      prefersDarkScheme.addEventListener('change', handleSystemThemeChange);
+    } else if (typeof prefersDarkScheme.addListener === 'function') {
+      prefersDarkScheme.addListener(handleSystemThemeChange);
+    }
+  }
+}
 
 function generateId(prefix = 'id') {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
