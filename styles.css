@@ -432,15 +432,156 @@ a:focus {
   gap: 0.75rem;
 }
 
+.payment-pill {
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 0.65rem 1.1rem;
+  font-weight: 600;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.payment-pill:focus,
+.payment-pill:hover {
+  outline: none;
+  border-color: transparent;
+  background: linear-gradient(135deg, rgba(29, 185, 84, 0.2), rgba(20, 140, 59, 0.25));
+  color: var(--green-dark);
+  box-shadow: 0 10px 20px rgba(17, 87, 36, 0.12);
+}
+
+.payment-pill.is-selected {
+  border-color: transparent;
+  background: linear-gradient(135deg, rgba(29, 185, 84, 0.32), rgba(20, 140, 59, 0.4));
+  color: var(--white);
+  box-shadow: 0 14px 30px rgba(17, 87, 36, 0.2);
+}
+
 .badge-inverse {
   background: rgba(20, 140, 59, 0.15);
   color: var(--green-dark);
   border: 1px solid rgba(20, 140, 59, 0.25);
 }
 
+.payment-selection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+}
+
+.payment-selection__label {
+  font-weight: 600;
+  margin: 0;
+}
+
+.payment-selection__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  font-weight: 600;
+}
+
+.payment-selection__actions span {
+  color: var(--green-dark);
+}
+
 .payment-note {
   color: var(--muted);
   margin: 0;
+}
+
+.payment-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 100;
+}
+
+.payment-modal.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.payment-modal__overlay {
+  position: absolute;
+  inset: 0;
+}
+
+.payment-modal__dialog {
+  position: relative;
+  max-width: 440px;
+  width: min(90vw, 440px);
+  padding: 2.25rem;
+  border-radius: 1.5rem;
+  background: var(--surface);
+  box-shadow: 0 20px 45px rgba(17, 87, 36, 0.22);
+  display: grid;
+  gap: 1.25rem;
+}
+
+.payment-modal__close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.payment-modal__close:hover,
+.payment-modal__close:focus {
+  color: var(--green-dark);
+}
+
+.card-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.card-form label {
+  font-weight: 600;
+}
+
+.card-form input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 0.85rem;
+  border: 1px solid var(--input-border);
+  background: var(--surface-alt);
+  color: var(--text);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-form input:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 4px var(--input-focus);
+  outline: none;
+}
+
+.card-form__row {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.card-form__field {
+  display: grid;
+  gap: 0.5rem;
 }
 
 .form-grid {

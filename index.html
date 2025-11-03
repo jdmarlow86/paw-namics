@@ -167,16 +167,70 @@
                 >Start your free trial</a
               >
             </article>
-            <article class="card payment-options">
+            <article class="card payment-options" data-payment-options>
               <h3>Choose Your Payment Method</h3>
               <p>
                 Subscribe with your preferred option—secure checkout supports
                 Cash App, Venmo, or major credit and debit cards.
               </p>
-              <div class="payment-badges">
-                <span class="badge badge-inverse">Cash App</span>
-                <span class="badge badge-inverse">Venmo</span>
-                <span class="badge badge-inverse">Credit / Debit Card</span>
+              <div
+                class="payment-badges"
+                role="radiogroup"
+                aria-label="Payment methods"
+              >
+                <button
+                  type="button"
+                  class="badge badge-inverse payment-pill"
+                  data-payment-option
+                  data-payment-type="link"
+                  data-payment-label="Cash App"
+                  data-payment-url="https://cash.app/$jdmarlow"
+                  role="radio"
+                  aria-checked="false"
+                >
+                  Cash App
+                </button>
+                <button
+                  type="button"
+                  class="badge badge-inverse payment-pill"
+                  data-payment-option
+                  data-payment-type="link"
+                  data-payment-label="Venmo"
+                  data-payment-url="https://venmo.com/u/Jonathan-Marlow-19"
+                  role="radio"
+                  aria-checked="false"
+                >
+                  Venmo
+                </button>
+                <button
+                  type="button"
+                  class="badge badge-inverse payment-pill"
+                  data-payment-option
+                  data-payment-type="card"
+                  data-payment-label="Credit / Debit Card"
+                  role="radio"
+                  aria-checked="false"
+                >
+                  Credit / Debit Card
+                </button>
+              </div>
+              <div
+                class="payment-selection"
+                data-payment-selection
+                aria-live="polite"
+                hidden
+              >
+                <p class="payment-selection__label">Selected payment method</p>
+                <div class="payment-selection__actions">
+                  <span data-payment-selected-label></span>
+                  <a
+                    class="btn btn-light"
+                    data-payment-action-link
+                    href="#"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  ></a>
+                </div>
               </div>
               <p class="payment-note">
                 Billing is handled through encrypted payment partners, and you
@@ -186,6 +240,84 @@
           </div>
         </div>
       </section>
+
+      <div class="payment-modal" data-card-modal aria-hidden="true">
+        <div class="payment-modal__overlay" data-card-dismiss></div>
+        <div
+          class="payment-modal__dialog"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="card-payment-title"
+        >
+          <button
+            type="button"
+            class="payment-modal__close"
+            aria-label="Close card payment form"
+            data-card-dismiss
+          >
+            ×
+          </button>
+          <h3 id="card-payment-title">Enter Card Details</h3>
+          <form class="card-form" data-card-form>
+            <label for="card-name">Cardholder Name</label>
+            <input
+              type="text"
+              id="card-name"
+              name="card-name"
+              autocomplete="cc-name"
+              placeholder="Full name as displayed on card"
+              required
+            />
+            <label for="card-number">Card Number</label>
+            <input
+              type="text"
+              id="card-number"
+              name="card-number"
+              inputmode="numeric"
+              autocomplete="cc-number"
+              placeholder="1234 5678 9012 3456"
+              required
+            />
+            <div class="card-form__row">
+              <div class="card-form__field">
+                <label for="card-expiration">Expiration</label>
+                <input
+                  type="text"
+                  id="card-expiration"
+                  name="card-expiration"
+                  inputmode="numeric"
+                  autocomplete="cc-exp"
+                  placeholder="MM / YY"
+                  required
+                />
+              </div>
+              <div class="card-form__field">
+                <label for="card-cvc">CVC</label>
+                <input
+                  type="text"
+                  id="card-cvc"
+                  name="card-cvc"
+                  inputmode="numeric"
+                  autocomplete="cc-csc"
+                  placeholder="123"
+                  required
+                />
+              </div>
+            </div>
+            <label for="card-zip">Billing ZIP / Postal Code</label>
+            <input
+              type="text"
+              id="card-zip"
+              name="card-zip"
+              inputmode="numeric"
+              autocomplete="postal-code"
+              placeholder="12345"
+              required
+            />
+            <button type="submit" class="btn">Purchase</button>
+          </form>
+        </div>
+      </div>
 
       <section class="section newsletter">
         <div class="container">
