@@ -37,6 +37,19 @@ const subscriptionMessage = document.querySelector('[data-subscription-message]'
 const subscriptionPlanInputs = subscriptionForm
   ? Array.from(subscriptionForm.querySelectorAll('[data-plan-option]'))
   : [];
+const paymentOptionsContainer = document.querySelector('[data-payment-options]');
+const paymentOptionButtons = paymentOptionsContainer
+  ? Array.from(paymentOptionsContainer.querySelectorAll('[data-payment-option]'))
+  : [];
+const paymentSelection = paymentOptionsContainer?.querySelector('[data-payment-selection]');
+const paymentSelectedLabel = paymentOptionsContainer?.querySelector('[data-payment-selected-label]');
+const paymentActionLink = paymentOptionsContainer?.querySelector('[data-payment-action-link]');
+const cardModal = document.querySelector('[data-card-modal]');
+const cardModalForm = cardModal?.querySelector('[data-card-form]');
+const cardModalDismissElements = cardModal
+  ? Array.from(cardModal.querySelectorAll('[data-card-dismiss]'))
+  : [];
+let activePaymentButton = null;
 const navigationToggles = document.querySelectorAll('[data-nav-toggle]');
 const themeToggle = document.querySelector('[data-theme-toggle]');
 const themeToggleIcon = themeToggle?.querySelector('[data-theme-toggle-icon]');
@@ -144,6 +157,7 @@ function initializeNavigation() {
 
 initializeNavigation();
 initializeTheme();
+initializePaymentOptions();
 
 function initializeTheme() {
   const getStoredTheme = () => {
@@ -204,6 +218,144 @@ function initializeTheme() {
     } else if (typeof prefersDarkScheme.addListener === 'function') {
       prefersDarkScheme.addListener(handleSystemThemeChange);
     }
+  }
+}
+
+function initializePaymentOptions() {
+  if (!paymentOptionButtons.length) {
+    return;
+  }
+
+  const hidePaymentSelection = () => {
+    if (paymentSelection) {
+      paymentSelection.hidden = true;
+    }
+    if (paymentActionLink) {
+      paymentActionLink.hidden = true;
+      paymentActionLink.removeAttribute('href');
+      paymentActionLink.textContent = '';
+    }
+  };
+
+  const showPaymentSelection = (label, url) => {
+    if (!paymentSelection || !paymentSelectedLabel || !paymentActionLink) {
+      return;
+    }
+    paymentSelectedLabel.textContent = label;
+    if (url) {
+      paymentActionLink.hidden = false;
+      paymentActionLink.href = url;
+      paymentActionLink.textContent = `Continue on ${label}`;
+    } else {
+      paymentActionLink.hidden = true;
+      paymentActionLink.removeAttribute('href');
+      paymentActionLink.textContent = '';
+    }
+    paymentSelection.hidden = false;
+  };
+
+  const setActivePayment = (button) => {
+    if (activePaymentButton === button) {
+      return;
+    }
+    if (activePaymentButton) {
+      activePaymentButton.classList.remove('is-selected');
+      activePaymentButton.setAttribute('aria-checked', 'false');
+    }
+    activePaymentButton = button;
+    activePaymentButton.classList.add('is-selected');
+    activePaymentButton.setAttribute('aria-checked', 'true');
+  };
+
+  const focusFirstField = () => {
+    if (!cardModalForm) {
+      return;
+    }
+    const firstInput = cardModalForm.querySelector('input');
+    if (firstInput) {
+      firstInput.focus();
+    }
+  };
+
+  const openCardModal = () => {
+    if (!cardModal) {
+      return;
+    }
+    cardModal.classList.add('is-open');
+    cardModal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    window.setTimeout(focusFirstField, 0);
+  };
+
+  const closeCardModal = ({ focusTrigger = false } = {}) => {
+    if (!cardModal) {
+      return;
+    }
+    cardModal.classList.remove('is-open');
+    cardModal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    if (cardModalForm) {
+      cardModalForm.reset();
+    }
+    if (focusTrigger && activePaymentButton) {
+      activePaymentButton.focus();
+    }
+  };
+
+  const handlePaymentClick = (button) => {
+    const { paymentType = '', paymentUrl = '', paymentLabel = '' } = button.dataset;
+    const label = paymentLabel || button.textContent.trim();
+
+    setActivePayment(button);
+
+    if (paymentType === 'card') {
+      hidePaymentSelection();
+      openCardModal();
+      return;
+    }
+
+    if (paymentType === 'link' && paymentUrl) {
+      showPaymentSelection(label, paymentUrl);
+    }
+  };
+
+  paymentOptionButtons.forEach((button) => {
+    button.setAttribute('role', 'radio');
+    button.setAttribute('aria-checked', 'false');
+    button.addEventListener('click', () => {
+      handlePaymentClick(button);
+    });
+    button.addEventListener('keydown', (event) => {
+      if (event.key === ' ' || event.key === 'Enter') {
+        event.preventDefault();
+        handlePaymentClick(button);
+      }
+    });
+  });
+
+  hidePaymentSelection();
+
+  cardModalDismissElements.forEach((dismiss) => {
+    dismiss.addEventListener('click', () => {
+      closeCardModal({ focusTrigger: true });
+    });
+  });
+
+  if (cardModal) {
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && cardModal.classList.contains('is-open')) {
+        event.preventDefault();
+        closeCardModal({ focusTrigger: true });
+      }
+    });
+  }
+
+  if (cardModalForm) {
+    cardModalForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      closeCardModal({ focusTrigger: true });
+      window.alert('Thank you! Your purchase request has been received.');
+    });
   }
 }
 
