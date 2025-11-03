@@ -208,6 +208,9 @@
                   data-payment-option
                   data-payment-type="card"
                   data-payment-label="Credit / Debit Card"
+                  data-payment-amount="59.00"
+                  data-payment-currency="USD"
+                  data-payment-description="PawNamics sitter subscription"
                   role="radio"
                   aria-checked="false"
                 >
@@ -314,7 +317,14 @@
               placeholder="12345"
               required
             />
-            <button type="submit" class="btn">Purchase</button>
+            <p
+              class="card-form__status"
+              data-card-status
+              role="status"
+              aria-live="polite"
+              hidden
+            ></p>
+            <button type="submit" class="btn" data-card-submit>Purchase</button>
           </form>
         </div>
       </div>
