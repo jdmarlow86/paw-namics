@@ -44,11 +44,16 @@ const paymentOptionButtons = paymentOptionsContainer
 const paymentSelection = paymentOptionsContainer?.querySelector('[data-payment-selection]');
 const paymentSelectedLabel = paymentOptionsContainer?.querySelector('[data-payment-selected-label]');
 const paymentActionLink = paymentOptionsContainer?.querySelector('[data-payment-action-link]');
+const CARD_PAYMENT_ENDPOINT = 'https://api.example-payments.com/v1/payments';
+const PAYMENT_DESTINATION_ACCOUNT = 'acct_PLACEHOLDER_DESTINATION';
 const cardModal = document.querySelector('[data-card-modal]');
 const cardModalForm = cardModal?.querySelector('[data-card-form]');
 const cardModalDismissElements = cardModal
   ? Array.from(cardModal.querySelectorAll('[data-card-dismiss]'))
   : [];
+const cardModalStatus = cardModal?.querySelector('[data-card-status]');
+const cardModalSubmit = cardModalForm?.querySelector('[data-card-submit]');
+const cardSubmitDefaultText = cardModalSubmit?.textContent?.trim() || 'Purchase';
 let activePaymentButton = null;
 const navigationToggles = document.querySelectorAll('[data-nav-toggle]');
 const themeToggle = document.querySelector('[data-theme-toggle]');
@@ -221,10 +226,273 @@ function initializeTheme() {
   }
 }
 
+function sanitizeDigits(value) {
+  return (value || '').toString().replace(/\D+/g, '');
+}
+
+function isValidCardNumber(cardNumber) {
+  const digits = sanitizeDigits(cardNumber);
+  if (digits.length < 12) {
+    return false;
+  }
+
+  let sum = 0;
+  let shouldDouble = false;
+
+  for (let index = digits.length - 1; index >= 0; index -= 1) {
+    let digit = Number.parseInt(digits.charAt(index), 10);
+    if (shouldDouble) {
+      digit *= 2;
+      if (digit > 9) {
+        digit -= 9;
+      }
+    }
+    sum += digit;
+    shouldDouble = !shouldDouble;
+  }
+
+  return sum % 10 === 0;
+}
+
+function parseExpiration(value) {
+  if (!value) {
+    return null;
+  }
+
+  const sanitized = value.toString().replace(/\s+/g, '');
+  const match = sanitized.match(/^(\d{2})\/?(\d{2}|\d{4})$/);
+
+  if (!match) {
+    return null;
+  }
+
+  const month = Number.parseInt(match[1], 10);
+  let year = Number.parseInt(match[2], 10);
+
+  if (Number.isNaN(month) || Number.isNaN(year) || month < 1 || month > 12) {
+    return null;
+  }
+
+  if (year < 100) {
+    const currentCentury = Math.floor(new Date().getFullYear() / 100) * 100;
+    year += currentCentury;
+  }
+
+  return { month, year };
+}
+
+function isExpired({ month, year }) {
+  const now = new Date();
+  const currentMonth = now.getMonth() + 1;
+  const currentYear = now.getFullYear();
+
+  if (year < currentYear) {
+    return true;
+  }
+
+  if (year === currentYear && month < currentMonth) {
+    return true;
+  }
+
+  return false;
+}
+
+function isValidPostalCode(value) {
+  if (!value) {
+    return false;
+  }
+  return /^[0-9A-Za-z\s-]{3,10}$/.test(value.toString().trim());
+}
+
+function setCardFormStatus(status, message) {
+  if (!cardModalStatus) {
+    return;
+  }
+
+  const normalizedStatus = status || 'idle';
+  cardModalStatus.dataset.status = normalizedStatus;
+  cardModalStatus.textContent = message || '';
+  cardModalStatus.hidden = !message;
+}
+
+function setCardSubmitting(isSubmitting) {
+  if (!cardModalForm) {
+    return;
+  }
+
+  const fields = Array.from(cardModalForm.querySelectorAll('input, button'));
+  fields.forEach((field) => {
+    if (field === cardModalSubmit) {
+      field.disabled = Boolean(isSubmitting);
+      return;
+    }
+
+    if (field.tagName === 'INPUT') {
+      if (isSubmitting) {
+        field.setAttribute('readonly', 'true');
+      } else {
+        field.removeAttribute('readonly');
+      }
+    } else {
+      field.disabled = Boolean(isSubmitting);
+    }
+  });
+
+  if (cardModalSubmit) {
+    cardModalSubmit.disabled = Boolean(isSubmitting);
+    cardModalSubmit.textContent = isSubmitting
+      ? 'Processing…'
+      : cardSubmitDefaultText;
+  }
+}
+
+function formatMinorUnits(amountInCents, currency = 'USD') {
+  if (!Number.isFinite(amountInCents) || amountInCents <= 0) {
+    return '';
+  }
+  const majorUnits = (amountInCents / 100).toFixed(2);
+  return `${currency.toUpperCase()} ${majorUnits}`;
+}
+
+function buildCardPaymentPayload(details, context) {
+  const {
+    cardNumber,
+    expiration,
+    cvc,
+    cardholderName,
+    postalCode,
+  } = details;
+
+  const { amountInCents, currency, description, label } = context;
+
+  return {
+    amount: amountInCents,
+    currency,
+    description: description || label || 'PawNamics card payment',
+    destinationAccount: PAYMENT_DESTINATION_ACCOUNT,
+    paymentMethod: {
+      type: 'card',
+      card: {
+        number: cardNumber,
+        expMonth: expiration.month,
+        expYear: expiration.year,
+        cvc,
+      },
+    },
+    billing: {
+      name: cardholderName,
+      postalCode,
+    },
+    metadata: {
+      brand: 'card',
+      label,
+    },
+  };
+}
+
+async function processCardPayment(paymentPayload) {
+  const shouldSimulate =
+    !CARD_PAYMENT_ENDPOINT || CARD_PAYMENT_ENDPOINT.includes('example.com');
+
+  if (shouldSimulate) {
+    return simulateCardPayment(paymentPayload);
+  }
+
+  const controller = typeof AbortController === 'function' ? new AbortController() : null;
+  const timeoutId = controller
+    ? window.setTimeout(() => {
+        controller.abort();
+      }, 15000)
+    : null;
+
+  try {
+    const response = await fetch(CARD_PAYMENT_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(paymentPayload),
+      signal: controller ? controller.signal : undefined,
+    });
+
+    if (!response.ok) {
+      throw new Error('The payment provider returned an error.');
+    }
+
+    const result = await response.json();
+    if (result.status && result.status !== 'succeeded') {
+      throw new Error('The payment could not be completed.');
+    }
+
+    return {
+      status: result.status || 'succeeded',
+      confirmationCode:
+        result.confirmationCode || result.id || result.reference || '',
+      raw: result,
+    };
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      throw new Error('The payment request timed out. Please try again.');
+    }
+    throw error;
+  } finally {
+    if (timeoutId) {
+      window.clearTimeout(timeoutId);
+    }
+  }
+}
+
+async function simulateCardPayment(paymentPayload) {
+  await new Promise((resolve) => window.setTimeout(resolve, 900));
+  return {
+    status: 'succeeded',
+    confirmationCode: `PN-${Math.random().toString(36).slice(2, 10).toUpperCase()}`,
+    raw: paymentPayload,
+  };
+}
+
 function initializePaymentOptions() {
   if (!paymentOptionButtons.length) {
     return;
   }
+
+  const parseAmountInCents = (button) => {
+    if (!button) {
+      return 0;
+    }
+
+    const { paymentAmountCents = '', paymentAmount = '' } = button.dataset;
+
+    if (paymentAmountCents && /^\d+$/.test(paymentAmountCents)) {
+      return Number.parseInt(paymentAmountCents, 10);
+    }
+
+    if (paymentAmount) {
+      const normalized = paymentAmount.replace(/[^0-9.]/g, '');
+      const amount = Number.parseFloat(normalized);
+      if (Number.isFinite(amount) && amount > 0) {
+        return Math.round(amount * 100);
+      }
+    }
+
+    return 0;
+  };
+
+  const getCurrencyForButton = (button) => {
+    if (!button) {
+      return 'USD';
+    }
+    const { paymentCurrency = 'USD' } = button.dataset;
+    const normalized = paymentCurrency.toString().trim().toUpperCase();
+    return normalized || 'USD';
+  };
+
+  let cardPaymentContext = {
+    label: '',
+    amountInCents: 0,
+    currency: 'USD',
+    description: '',
+  };
 
   const hidePaymentSelection = () => {
     if (paymentSelection) {
@@ -297,6 +565,14 @@ function initializePaymentOptions() {
     if (cardModalForm) {
       cardModalForm.reset();
     }
+    setCardSubmitting(false);
+    setCardFormStatus('idle', '');
+    cardPaymentContext = {
+      label: '',
+      amountInCents: 0,
+      currency: 'USD',
+      description: '',
+    };
     if (focusTrigger && activePaymentButton) {
       activePaymentButton.focus();
     }
@@ -306,10 +582,33 @@ function initializePaymentOptions() {
     const { paymentType = '', paymentUrl = '', paymentLabel = '' } = button.dataset;
     const label = paymentLabel || button.textContent.trim();
 
+    cardPaymentContext = {
+      label,
+      amountInCents: parseAmountInCents(button),
+      currency: getCurrencyForButton(button),
+      description: button.dataset.paymentDescription || '',
+    };
+
     setActivePayment(button);
 
     if (paymentType === 'card') {
       hidePaymentSelection();
+      if (cardModalForm) {
+        cardModalForm.reset();
+      }
+      setCardSubmitting(false);
+      const amountLabel = formatMinorUnits(
+        cardPaymentContext.amountInCents,
+        cardPaymentContext.currency
+      );
+      if (amountLabel) {
+        setCardFormStatus(
+          'info',
+          `You are paying ${amountLabel} with ${label}.`
+        );
+      } else {
+        setCardFormStatus('idle', '');
+      }
       openCardModal();
       return;
     }
@@ -351,10 +650,111 @@ function initializePaymentOptions() {
   }
 
   if (cardModalForm) {
-    cardModalForm.addEventListener('submit', (event) => {
+    cardModalForm.addEventListener('submit', async (event) => {
       event.preventDefault();
-      closeCardModal({ focusTrigger: true });
-      window.alert('Thank you! Your purchase request has been received.');
+
+      const formData = new FormData(cardModalForm);
+      const cardholderName = (formData.get('card-name') || '').toString().trim();
+      const cardNumber = sanitizeDigits(formData.get('card-number') || '');
+      const expirationInput = (formData.get('card-expiration') || '')
+        .toString()
+        .trim();
+      const expiration = parseExpiration(expirationInput);
+      const cvc = sanitizeDigits(formData.get('card-cvc') || '');
+      const postalCode = (formData.get('card-zip') || '').toString().trim();
+
+      if (!cardholderName) {
+        setCardFormStatus('error', 'Please enter the cardholder name.');
+        cardModalForm.querySelector('#card-name')?.focus();
+        return;
+      }
+
+      if (!isValidCardNumber(cardNumber)) {
+        setCardFormStatus('error', 'Please enter a valid card number.');
+        cardModalForm.querySelector('#card-number')?.focus();
+        return;
+      }
+
+      if (!expiration || isExpired(expiration)) {
+        setCardFormStatus('error', 'Please enter a valid card expiration date.');
+        cardModalForm.querySelector('#card-expiration')?.focus();
+        return;
+      }
+
+      if (!/^\d{3,4}$/.test(cvc)) {
+        setCardFormStatus('error', 'Please enter the 3 or 4 digit CVC code.');
+        cardModalForm.querySelector('#card-cvc')?.focus();
+        return;
+      }
+
+      if (!isValidPostalCode(postalCode)) {
+        setCardFormStatus(
+          'error',
+          'Please enter a valid billing ZIP or postal code.'
+        );
+        cardModalForm.querySelector('#card-zip')?.focus();
+        return;
+      }
+
+      if (!cardPaymentContext.amountInCents) {
+        setCardFormStatus(
+          'error',
+          'A payment amount is required before processing the card.'
+        );
+        return;
+      }
+
+      const paymentDetails = {
+        cardNumber,
+        expiration,
+        cvc,
+        cardholderName,
+        postalCode,
+      };
+
+      const paymentPayload = buildCardPaymentPayload(
+        paymentDetails,
+        cardPaymentContext
+      );
+
+      try {
+        setCardSubmitting(true);
+        setCardFormStatus('loading', 'Processing payment securely…');
+        const result = await processCardPayment(paymentPayload);
+
+        if (!result || result.status !== 'succeeded') {
+          throw new Error('We were unable to complete the payment.');
+        }
+
+        const confirmationCode = result.confirmationCode
+          ? ` Confirmation #${result.confirmationCode}.`
+          : '';
+        const amountLabel = formatMinorUnits(
+          cardPaymentContext.amountInCents,
+          cardPaymentContext.currency
+        );
+        const amountMessage = amountLabel
+          ? `${amountLabel} has been charged.`
+          : 'Your card has been charged.';
+
+        setCardFormStatus('success', `${amountMessage}${confirmationCode}`);
+
+        const paymentLabel = cardPaymentContext.label;
+
+        window.setTimeout(() => {
+          closeCardModal({ focusTrigger: true });
+          if (paymentLabel) {
+            showPaymentSelection(paymentLabel);
+          }
+        }, 1600);
+      } catch (error) {
+        const message =
+          error && typeof error.message === 'string'
+            ? error.message
+            : 'We were unable to process your payment. Please try again.';
+        setCardFormStatus('error', message);
+        setCardSubmitting(false);
+      }
     });
   }
 }
