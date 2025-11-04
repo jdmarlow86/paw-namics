@@ -332,6 +332,17 @@ a:focus {
   color: var(--muted);
 }
 
+.newsletter-status {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--green-dark);
+}
+
+.newsletter-status[data-status='error'] {
+  color: var(--accent);
+}
+
 .section-header {
   text-align: left;
   margin-bottom: 2rem;

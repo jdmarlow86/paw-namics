@@ -34,6 +34,8 @@ const sitterVideoButton = document.querySelector('[data-sitter-video]');
 const subscriptionForm = document.querySelector('[data-subscription-form]');
 const subscriptionTotal = document.querySelector('[data-subscription-total]');
 const subscriptionMessage = document.querySelector('[data-subscription-message]');
+const newsletterForm = document.querySelector('[data-newsletter-form]');
+const newsletterStatus = newsletterForm?.querySelector('[data-newsletter-status]');
 const subscriptionPlanInputs = subscriptionForm
   ? Array.from(subscriptionForm.querySelectorAll('[data-plan-option]'))
   : [];
@@ -72,6 +74,9 @@ const sitterPhotoPreviewFilename = sitterForm?.querySelector('[data-photo-previe
 const sitterPhotoHelpText =
   document.getElementById('photo-help')?.textContent?.trim() ||
   'Upload a square image for the best results.';
+
+const NEWSLETTER_DEFAULT_RECIPIENT = 'subscribe@pawnamics.com';
+const NEWSLETTER_DEFAULT_CC = 'pawnamics.contact@gmail.com';
 
 const DEFAULT_SITTER_PHOTO =
   'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80';
@@ -163,6 +168,52 @@ function initializeNavigation() {
 initializeNavigation();
 initializeTheme();
 initializePaymentOptions();
+
+function getNewsletterConfig() {
+  if (!newsletterForm) {
+    return {
+      recipient: NEWSLETTER_DEFAULT_RECIPIENT,
+      cc: [NEWSLETTER_DEFAULT_CC],
+    };
+  }
+
+  const { newsletterRecipient = '', newsletterCc = '' } = newsletterForm.dataset || {};
+  const recipient = newsletterRecipient.trim() || NEWSLETTER_DEFAULT_RECIPIENT;
+  const ccList = (newsletterCc.trim() || NEWSLETTER_DEFAULT_CC)
+    .split(',')
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+
+  if (!ccList.includes(NEWSLETTER_DEFAULT_CC)) {
+    ccList.push(NEWSLETTER_DEFAULT_CC);
+  }
+
+  return {
+    recipient,
+    cc: ccList,
+  };
+}
+
+function setNewsletterStatusMessage(message, statusType = 'success') {
+  if (!newsletterStatus) {
+    return;
+  }
+
+  if (!message) {
+    newsletterStatus.textContent = '';
+    newsletterStatus.hidden = true;
+    newsletterStatus.removeAttribute('data-status');
+    return;
+  }
+
+  newsletterStatus.textContent = message;
+  if (statusType === 'error') {
+    newsletterStatus.dataset.status = 'error';
+  } else {
+    newsletterStatus.dataset.status = 'success';
+  }
+  newsletterStatus.hidden = false;
+}
 
 function initializeTheme() {
   const getStoredTheme = () => {
@@ -1356,6 +1407,56 @@ subscriptionForm?.addEventListener('submit', (event) => {
     subscriptionPlanInputs[0].checked = true;
   }
   updateSubscriptionSummary();
+});
+
+newsletterForm?.addEventListener('submit', (event) => {
+  event.preventDefault();
+
+  const formData = new FormData(newsletterForm);
+  const name = (formData.get('name') || '').toString().trim();
+  const email = (formData.get('email') || '').toString().trim();
+
+  if (!email) {
+    setNewsletterStatusMessage(
+      'Please provide your email address so we can subscribe you.',
+      'error'
+    );
+    return;
+  }
+
+  const { recipient, cc } = getNewsletterConfig();
+  const subscriberName = name || 'PawNamics visitor';
+  const subject = `Newsletter subscription from ${subscriberName}`;
+  const messageLines = [
+    'Hello PawNamics team,',
+    '',
+    'Please add me to the PawNamics newsletter.',
+    `Name: ${subscriberName}`,
+    `Email: ${email}`,
+    '',
+    'Submitted via PawNamics.com',
+  ];
+
+  const params = new URLSearchParams();
+  if (subject) {
+    params.set('subject', subject);
+  }
+  params.set('body', messageLines.join('\n'));
+  if (cc.length) {
+    params.set('cc', cc.join(','));
+  }
+
+  const mailtoUrl = `mailto:${recipient}?${params.toString()}`;
+  window.location.href = mailtoUrl;
+
+  setNewsletterStatusMessage(
+    'Opening your email app so you can confirm your subscription…'
+  );
+  newsletterForm.reset();
+});
+
+newsletterForm?.addEventListener('input', () => {
+  setNewsletterStatusMessage('');
 });
 
 sitterForm?.addEventListener('submit', async (event) => {
