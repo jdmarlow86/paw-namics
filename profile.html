@@ -86,6 +86,59 @@
         </div>
       </section>
 
+      <section
+        class="section profile-highlight hidden"
+        data-profile-highlight
+        aria-live="polite"
+      >
+        <div class="container">
+          <h2 class="section-title">Your published profile</h2>
+          <article class="card profile-card profile-highlight-card">
+            <header class="profile-header">
+              <img
+                src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=400&q=80"
+                alt="Profile avatar"
+                data-profile-highlight-avatar
+              />
+              <div>
+                <h3 data-profile-highlight-name>Your Name</h3>
+                <p class="profile-headline" data-profile-highlight-headline>
+                  Add a short headline to introduce yourself.
+                </p>
+                <p class="profile-location">
+                  <span>📍</span>
+                  <span data-profile-highlight-location>Location not provided</span>
+                </p>
+                <a
+                  class="profile-email hidden"
+                  data-profile-highlight-email
+                  href="#"
+                ></a>
+              </div>
+            </header>
+            <dl class="profile-meta">
+              <div>
+                <dt>Pet focus</dt>
+                <dd data-profile-highlight-pets>Share which pets you care for.</dd>
+              </div>
+              <div>
+                <dt>Experience</dt>
+                <dd data-profile-highlight-experience>Experience not listed yet</dd>
+              </div>
+            </dl>
+            <p class="profile-bio" data-profile-highlight-bio>
+              Tell the community a little more about yourself.
+            </p>
+            <p class="note hidden" data-profile-highlight-background></p>
+            <div class="profile-actions">
+              <button class="btn btn-danger" type="button" data-profile-delete>
+                Delete profile
+              </button>
+            </div>
+          </article>
+        </div>
+      </section>
+
       <section id="profile-builder" class="section section-alt">
         <div class="container grid two-col">
           <article class="card">
@@ -225,6 +278,11 @@
               <p class="profile-bio" data-profile-bio>
                 Tell the community a little more about yourself.
               </p>
+              <div class="profile-actions">
+                <button class="btn btn-danger" type="button" data-profile-delete>
+                  Delete profile
+                </button>
+              </div>
             </div>
           </article>
         </div>
