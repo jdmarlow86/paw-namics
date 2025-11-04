@@ -77,6 +77,10 @@
               compassionate, professional care. Build a standout profile and make
               connections that fit your schedule.
             </p>
+            <div class="hero-actions">
+              <a class="btn" href="#sitter-signup">Sign up</a>
+              <a class="btn btn-outline" href="#sitter-login">Log in</a>
+            </div>
           </div>
           <img
             src="https://images.unsplash.com/photo-1601758125946-6ec2e5e47f80?auto=format&fit=crop&w=700&q=80"
@@ -95,16 +99,39 @@
               pet parents to explore.
             </p>
           </div>
-          <form id="sitter-form" class="card form-grid" autocomplete="off">
-            <label>
-              Full Name
-              <input type="text" name="name" required placeholder="Jane Doe" />
-            </label>
-            <label>
-              Location
-              <input
-                type="text"
-                name="location"
+          <div class="grid two-col" id="sitter-signup">
+            <form id="sitter-form" class="card form-grid" autocomplete="off">
+              <label>
+                Full Name
+                <input type="text" name="name" required placeholder="Jane Doe" />
+              </label>
+              <label>
+                Username
+                <input
+                  type="text"
+                  name="username"
+                  required
+                  minlength="3"
+                  autocomplete="username"
+                  placeholder="jane-doe"
+                />
+              </label>
+              <label>
+                Password
+                <input
+                  type="password"
+                  name="password"
+                  required
+                  minlength="6"
+                  autocomplete="new-password"
+                  placeholder="At least 6 characters"
+                />
+              </label>
+              <label>
+                Location
+                <input
+                  type="text"
+                  name="location"
                 required
                 placeholder="Austin, TX"
               />
@@ -196,8 +223,52 @@
                 </div>
               </div>
             </label>
+            <p
+              class="form-message hidden"
+              data-sitter-form-message
+              role="status"
+              aria-live="polite"
+            ></p>
             <button type="submit" class="btn full">Save Profile</button>
-          </form>
+            </form>
+
+            <aside class="card auth-card" id="sitter-login">
+              <h2>Already a sitter?</h2>
+              <p>
+                Log in with the username and password you used when you created
+                your PawNamics sitter profile to jump straight to your listing.
+              </p>
+              <form data-sitter-login-form autocomplete="on" class="form-grid single-column">
+                <label>
+                  Username
+                  <input
+                    type="text"
+                    name="username"
+                    required
+                    autocomplete="username"
+                    placeholder="jane-doe"
+                  />
+                </label>
+                <label>
+                  Password
+                  <input
+                    type="password"
+                    name="password"
+                    required
+                    autocomplete="current-password"
+                    placeholder="Your password"
+                  />
+                </label>
+                <button type="submit" class="btn">Log in to your profile</button>
+                <p
+                  class="form-message hidden"
+                  data-login-message
+                  role="status"
+                  aria-live="polite"
+                ></p>
+              </form>
+            </aside>
+          </div>
         </div>
       </section>
 

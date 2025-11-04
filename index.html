@@ -83,6 +83,7 @@
               <a class="btn btn-outline" href="#available-sitters"
                 >Find a Sitter</a
               >
+              <a class="btn btn-outline" href="#sitter-login">Log In</a>
             </div>
           </div>
           <img
@@ -138,6 +139,64 @@
           <p class="note">
             Tip: Click a sitter to reveal contact options and start a video chat.
           </p>
+        </div>
+      </section>
+
+      <section class="section section-alt">
+        <div class="container">
+          <div class="section-header">
+            <h2>Access your PawNamics account</h2>
+            <p>
+              New to PawNamics? Start your sitter profile, or log in with your
+              saved username and password to jump back into your dashboard.
+            </p>
+          </div>
+          <div class="grid two-col">
+            <article class="card auth-card">
+              <h3>Get started</h3>
+              <p>
+                Build a sitter profile with your experience, rates, and
+                availability so pet parents can find you.
+              </p>
+              <a class="btn" href="become-a-sitter.html#sitter-signup">Sign up</a>
+            </article>
+            <article class="card auth-card" id="sitter-login">
+              <h3>Log in to your profile</h3>
+              <p>
+                Enter the credentials you created on the Become a Sitter page to
+                open your saved profile instantly.
+              </p>
+              <form data-sitter-login-form autocomplete="on" class="form-grid single-column">
+                <label>
+                  Username
+                  <input
+                    type="text"
+                    name="username"
+                    required
+                    autocomplete="username"
+                    placeholder="jane-doe"
+                  />
+                </label>
+                <label>
+                  Password
+                  <input
+                    type="password"
+                    name="password"
+                    required
+                    autocomplete="current-password"
+                    placeholder="Your password"
+                  />
+                </label>
+                <button type="submit" class="btn">Log In</button>
+                <p
+                  class="form-message hidden"
+                  data-login-message
+                  role="status"
+                  aria-live="polite"
+                ></p>
+              </form>
+            </article>
+          </div>
         </div>
       </section>
 

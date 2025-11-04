@@ -75,6 +75,9 @@ const sitterPhotoHelpText =
   document.getElementById('photo-help')?.textContent?.trim() ||
   'Upload a square image for the best results.';
 
+const loginForms = Array.from(document.querySelectorAll('[data-sitter-login-form]'));
+const sitterFormMessage = sitterForm?.querySelector('[data-sitter-form-message]');
+
 const NEWSLETTER_DEFAULT_RECIPIENT = 'subscribe@pawnamics.com';
 const NEWSLETTER_DEFAULT_CC = 'pawnamics.contact@gmail.com';
 
@@ -90,6 +93,7 @@ const STORAGE_KEYS = {
   PROFILE: 'pawnamics_user_profile',
   SUBSCRIPTIONS: 'pawnamics_sitter_subscriptions',
   THEME: 'pawnamics_theme',
+  ACTIVE_SITTER: 'pawnamics_active_sitter',
 };
 
 function initializeNavigation() {
@@ -836,6 +840,36 @@ function saveStoredData(key, value) {
   }
 }
 
+function setFormMessage(element, message, type = 'info') {
+  if (!element) {
+    return;
+  }
+
+  element.classList.remove('is-info', 'is-error', 'is-success');
+
+  if (!message) {
+    element.textContent = '';
+    element.classList.add('hidden');
+    return;
+  }
+
+  element.textContent = message;
+  element.classList.remove('hidden');
+
+  const typeClass =
+    type === 'error' ? 'is-error' : type === 'success' ? 'is-success' : 'is-info';
+  element.classList.add(typeClass);
+}
+
+function findSitterByUsername(username) {
+  if (!username) return undefined;
+  const normalized = username.trim().toLowerCase();
+  if (!normalized) return undefined;
+  return sitters.find((entry) =>
+    typeof entry.username === 'string' && entry.username.trim().toLowerCase() === normalized
+  );
+}
+
 function fileToDataUrl(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -1095,7 +1129,11 @@ function renderSitterProfilePage() {
   if (!sitterProfileSection) return;
 
   const params = new URLSearchParams(window.location.search);
-  const sitterId = params.get('id');
+  let sitterId = params.get('id');
+
+  if (!sitterId && activeSitterAccount?.id) {
+    sitterId = activeSitterAccount.id;
+  }
 
   if (!sitterId) {
     toggleSitterProfileVisibility(false);
@@ -1206,6 +1244,7 @@ const sitters = loadStoredData(STORAGE_KEYS.SITTERS);
 const questions = loadStoredData(STORAGE_KEYS.QUESTIONS);
 const subscriptions = loadStoredData(STORAGE_KEYS.SUBSCRIPTIONS);
 let userProfile = loadStoredData(STORAGE_KEYS.PROFILE, null);
+let activeSitterAccount = loadStoredData(STORAGE_KEYS.ACTIVE_SITTER, null);
 let activeSitterFilters = {
   location: '',
   maxRate: null,
@@ -1225,6 +1264,14 @@ sitters.forEach((entry) => {
 
 if (sitterDataUpdated) {
   saveStoredData(STORAGE_KEYS.SITTERS, sitters);
+}
+
+if (
+  activeSitterAccount &&
+  !sitters.some((entry) => entry.id === activeSitterAccount.id)
+) {
+  activeSitterAccount = null;
+  saveStoredData(STORAGE_KEYS.ACTIVE_SITTER, null);
 }
 
 if (sitterFilters) {
@@ -1462,6 +1509,38 @@ newsletterForm?.addEventListener('input', () => {
 sitterForm?.addEventListener('submit', async (event) => {
   event.preventDefault();
   const formData = new FormData(sitterForm);
+  setFormMessage(sitterFormMessage, '');
+
+  const username = (formData.get('username') || '').toString().trim();
+  const password = (formData.get('password') || '').toString();
+
+  if (!username || !password) {
+    setFormMessage(
+      sitterFormMessage,
+      'Please choose a username and password to save your profile.',
+      'error'
+    );
+    return;
+  }
+
+  if (password.length < 6) {
+    setFormMessage(
+      sitterFormMessage,
+      'Your password should be at least 6 characters long.',
+      'error'
+    );
+    return;
+  }
+
+  const existingSitter = findSitterByUsername(username);
+  if (existingSitter) {
+    setFormMessage(
+      sitterFormMessage,
+      'That username is already taken. Try a different one or log in instead.',
+      'error'
+    );
+    return;
+  }
 
   const parseNumberField = (name) => {
     const value = formData.get(name);
@@ -1499,21 +1578,98 @@ sitterForm?.addEventListener('submit', async (event) => {
     dailyRate: Number.isFinite(dailyRateNumber) ? dailyRateNumber.toFixed(0) : '',
     experience: Number.isFinite(experienceNumber) ? experienceNumber.toFixed(0) : '',
     photo: photoData,
+    username,
+    password,
+    createdAt: new Date().toISOString(),
   };
 
   sitters.unshift(sitterRecord);
   saveStoredData(STORAGE_KEYS.SITTERS, sitters);
+  activeSitterAccount = {
+    id: sitterRecord.id,
+    username: sitterRecord.username,
+    name: sitterRecord.name || sitterRecord.username,
+  };
+  saveStoredData(STORAGE_KEYS.ACTIVE_SITTER, activeSitterAccount);
   renderSitterDirectory();
   sitterForm.reset();
   resetSitterPhotoPreview();
+  setFormMessage(
+    sitterFormMessage,
+    'Profile saved! Redirecting you to your public page…',
+    'success'
+  );
 
   const profileUrl = new URL('sitter-profile.html', window.location.href);
   profileUrl.searchParams.set('id', sitterRecord.id);
   window.location.href = profileUrl.toString();
 });
 
+sitterForm?.addEventListener('input', () => {
+  setFormMessage(sitterFormMessage, '');
+});
+
 sitterForm?.addEventListener('reset', () => {
   resetSitterPhotoPreview();
+});
+
+loginForms.forEach((form) => {
+  const messageElement = form.querySelector('[data-login-message]');
+
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    setFormMessage(messageElement, '');
+
+    const formData = new FormData(form);
+    const username = (formData.get('username') || '').toString().trim();
+    const password = (formData.get('password') || '').toString();
+
+    if (!username || !password) {
+      setFormMessage(
+        messageElement,
+        'Enter both your username and password to continue.',
+        'error'
+      );
+      return;
+    }
+
+    if (!sitters.length) {
+      setFormMessage(
+        messageElement,
+        'No sitter accounts are saved on this device yet. Create a profile first.',
+        'error'
+      );
+      return;
+    }
+
+    const sitter = findSitterByUsername(username);
+
+    if (!sitter || typeof sitter.password !== 'string' || sitter.password !== password) {
+      setFormMessage(
+        messageElement,
+        'We could not find a matching account. Check your details or create a new profile.',
+        'error'
+      );
+      return;
+    }
+
+    activeSitterAccount = {
+      id: sitter.id,
+      username: sitter.username || username,
+      name: sitter.name || sitter.username || username,
+    };
+    saveStoredData(STORAGE_KEYS.ACTIVE_SITTER, activeSitterAccount);
+
+    setFormMessage(messageElement, 'Logging you in…', 'info');
+
+    const profileUrl = new URL('sitter-profile.html', window.location.href);
+    profileUrl.searchParams.set('id', sitter.id);
+    window.location.href = profileUrl.toString();
+  });
+
+  form.addEventListener('input', () => {
+    setFormMessage(messageElement, '');
+  });
 });
 
 questionForm?.addEventListener('submit', (event) => {
