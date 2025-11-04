@@ -1188,6 +1188,34 @@ select:focus {
   gap: 1.5rem;
 }
 
+.profile-highlight {
+  background: var(--surface-alt);
+  padding-block: 4rem;
+}
+
+.profile-highlight-card {
+  max-width: 720px;
+  margin: 0 auto;
+  gap: 1.75rem;
+}
+
+.profile-highlight-card .profile-header {
+  align-items: flex-start;
+}
+
+.profile-highlight-card .profile-header img {
+  width: 120px;
+  height: 120px;
+}
+
+.profile-highlight-card .profile-bio {
+  font-size: 1.05rem;
+}
+
+.profile-highlight-card [data-profile-highlight-background] {
+  margin: 0;
+}
+
 .profile-details {
   display: grid;
   gap: 1.5rem;
@@ -1206,6 +1234,20 @@ select:focus {
   border-radius: 50%;
   border: 4px solid var(--green-light);
   box-shadow: 0 8px 20px rgba(20, 140, 59, 0.15);
+}
+
+.profile-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.profile-actions .btn {
+  min-width: 180px;
+}
+
+.section-title {
+  margin: 0 0 1.5rem;
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
 }
 
 .background-check-control {
@@ -1259,6 +1301,38 @@ select:focus {
 
 .background-check-message[data-status='info'] {
   color: var(--info);
+}
+
+.btn-danger {
+  background: var(--error);
+  color: var(--white);
+}
+
+.btn-danger:hover,
+.btn-danger:focus {
+  background: #a72c23;
+  color: var(--white);
+}
+
+[data-theme='dark'] .btn-danger {
+  background: #ff7065;
+  color: var(--text);
+}
+
+[data-theme='dark'] .btn-danger:hover,
+[data-theme='dark'] .btn-danger:focus {
+  background: #ff5a4d;
+  color: var(--text);
+}
+
+@media (max-width: 720px) {
+  .profile-actions {
+    justify-content: flex-start;
+  }
+
+  .profile-actions .btn {
+    width: 100%;
+  }
 }
 
 .profile-headline {

@@ -23,12 +23,23 @@ const profilePets = document.querySelector('[data-profile-pets]');
 const profileExperience = document.querySelector('[data-profile-experience]');
 const profileBio = document.querySelector('[data-profile-bio]');
 const profileMessage = document.querySelector('[data-profile-message]');
+const profileHighlightSection = document.querySelector('[data-profile-highlight]');
+const profileHighlightAvatar = document.querySelector('[data-profile-highlight-avatar]');
+const profileHighlightName = document.querySelector('[data-profile-highlight-name]');
+const profileHighlightHeadline = document.querySelector('[data-profile-highlight-headline]');
+const profileHighlightLocation = document.querySelector('[data-profile-highlight-location]');
+const profileHighlightEmail = document.querySelector('[data-profile-highlight-email]');
+const profileHighlightPets = document.querySelector('[data-profile-highlight-pets]');
+const profileHighlightExperience = document.querySelector('[data-profile-highlight-experience]');
+const profileHighlightBio = document.querySelector('[data-profile-highlight-bio]');
+const profileHighlightBackground = document.querySelector('[data-profile-highlight-background]');
 const backgroundCheckButton = document.querySelector('[data-background-check-button]');
 const backgroundCheckStatus = document.querySelector('[data-background-check-status]');
 const backgroundCheckIcon = document.querySelector('[data-background-check-icon]');
 const backgroundCheckText = document.querySelector('[data-background-check-text]');
 const backgroundCheckMessage = document.querySelector('[data-background-check-message]');
 const backgroundCheckDetails = document.querySelector('[data-background-check-details]');
+const profileDeleteButtons = Array.from(document.querySelectorAll('[data-profile-delete]'));
 const sitterProfileHero = document.querySelector('[data-sitter-hero]');
 const sitterProfileSection = document.querySelector('[data-sitter-profile]');
 const sitterProfileEmpty = document.querySelector('[data-sitter-empty]');
@@ -1445,15 +1456,21 @@ if (sitterPhotoPreview) {
   resetSitterPhotoPreview();
 }
 
-if (profileForm && userProfile) {
-  const formElements = Array.from(profileForm.elements).filter(
-    (element) => element.name && element.type !== 'submit'
-  );
-  formElements.forEach((field) => {
-    if (Object.prototype.hasOwnProperty.call(userProfile, field.name)) {
-      field.value = userProfile[field.name];
-    }
-  });
+if (profileForm) {
+  const backgroundCheckComplete =
+    userProfile?.backgroundCheck?.status === 'clear';
+  if (userProfile && !backgroundCheckComplete) {
+    const formElements = Array.from(profileForm.elements).filter(
+      (element) => element.name && element.type !== 'submit'
+    );
+    formElements.forEach((field) => {
+      if (Object.prototype.hasOwnProperty.call(userProfile, field.name)) {
+        field.value = userProfile[field.name];
+      }
+    });
+  } else {
+    profileForm.reset();
+  }
 }
 
 sitterFilters?.addEventListener('submit', (event) => {
@@ -1508,6 +1525,9 @@ backgroundCheckButton?.addEventListener('click', () => {
         'Background check completed successfully. Results: Clear.',
         'success'
       );
+      if (profileForm) {
+        profileForm.reset();
+      }
     } catch (error) {
       console.error('Unable to record background check result', error);
       setBackgroundCheckMessage(
@@ -1647,11 +1667,15 @@ function renderProfile(profile) {
     profileEmptyState.classList.remove('hidden');
     updateBackgroundCheckUI(null);
     setBackgroundCheckMessage(null);
+    if (profileHighlightSection) {
+      profileHighlightSection.classList.add('hidden');
+    }
     return;
   }
 
   const avatarUrl = profile.photo ||
     'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=400&q=80';
+  const backgroundCheckComplete = profile.backgroundCheck?.status === 'clear';
 
   profileEmptyState.classList.add('hidden');
   profileDetails.classList.remove('hidden');
@@ -1702,6 +1726,79 @@ function renderProfile(profile) {
   }
 
   updateBackgroundCheckUI(profile.backgroundCheck || null);
+
+  if (profileHighlightSection) {
+    if (backgroundCheckComplete) {
+      profileHighlightSection.classList.remove('hidden');
+
+      if (profileHighlightAvatar) {
+        profileHighlightAvatar.src = avatarUrl;
+        profileHighlightAvatar.alt = profile.name
+          ? `${profile.name}'s profile photo`
+          : 'Profile avatar';
+      }
+
+      if (profileHighlightName) {
+        profileHighlightName.textContent = profile.name || 'Your Name';
+      }
+
+      if (profileHighlightHeadline) {
+        profileHighlightHeadline.textContent =
+          profile.headline || 'Add a short headline to introduce yourself.';
+      }
+
+      if (profileHighlightLocation) {
+        profileHighlightLocation.textContent =
+          profile.location || 'Location not provided';
+      }
+
+      if (profileHighlightEmail) {
+        if (profile.email) {
+          profileHighlightEmail.textContent = profile.email;
+          profileHighlightEmail.href = `mailto:${profile.email}`;
+          profileHighlightEmail.classList.remove('hidden');
+        } else {
+          profileHighlightEmail.textContent = '';
+          profileHighlightEmail.href = '#';
+          profileHighlightEmail.classList.add('hidden');
+        }
+      }
+
+      if (profileHighlightPets) {
+        profileHighlightPets.textContent =
+          profile.petFocus || 'Share which pets you care for.';
+      }
+
+      if (profileHighlightExperience) {
+        profileHighlightExperience.textContent = profile.experience
+          ? `${profile.experience} years`
+          : 'Experience not listed yet';
+      }
+
+      if (profileHighlightBio) {
+        profileHighlightBio.textContent =
+          profile.bio || 'Tell the community a little more about yourself.';
+      }
+
+      if (profileHighlightBackground) {
+        const completedAt = profile.backgroundCheck?.completedAt;
+        const completedOn = formatBackgroundCheckDate(completedAt);
+        const summary = profile.backgroundCheck?.summary || '';
+        const baseMessage = completedOn
+          ? `Background check completed on ${completedOn}.`
+          : 'Background check completed.';
+        const message = summary ? `${baseMessage} ${summary}` : baseMessage;
+        profileHighlightBackground.textContent = message;
+        profileHighlightBackground.classList.remove('hidden');
+      }
+    } else {
+      profileHighlightSection.classList.add('hidden');
+      if (profileHighlightBackground) {
+        profileHighlightBackground.textContent = '';
+        profileHighlightBackground.classList.add('hidden');
+      }
+    }
+  }
 }
 
 sitterPhotoInput?.addEventListener('change', async () => {
@@ -2120,6 +2217,38 @@ profileForm?.addEventListener('submit', (event) => {
       profileMessage.classList.add('hidden');
     }, 4000);
   }
+});
+
+profileDeleteButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    const confirmed = window.confirm(
+      'Are you sure you want to delete your saved profile? This cannot be undone.'
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    userProfile = null;
+    try {
+      localStorage.removeItem(STORAGE_KEYS.PROFILE);
+    } catch (error) {
+      console.warn('Unable to remove profile from storage', error);
+    }
+
+    renderProfile(null);
+    if (profileForm) {
+      profileForm.reset();
+    }
+    backgroundCheckInProgress = false;
+    if (profileMessage) {
+      profileMessage.textContent = 'Profile deleted.';
+      profileMessage.classList.remove('hidden');
+      setTimeout(() => {
+        profileMessage?.classList.add('hidden');
+      }, 4000);
+    }
+  });
 });
 
 if (videoFrame) {
