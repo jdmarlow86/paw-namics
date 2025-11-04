@@ -177,6 +177,41 @@
                   <a class="profile-email hidden" data-profile-email href="#"></a>
                 </div>
               </header>
+              <div class="background-check-control" data-background-check-container>
+                <button
+                  class="btn btn-light"
+                  type="button"
+                  data-background-check-button
+                  data-background-check-retry-label="Run background check again"
+                >
+                  Run free background check
+                </button>
+                <span
+                  class="background-check-status"
+                  data-background-check-status
+                  data-state="idle"
+                  role="status"
+                >
+                  <span
+                    class="background-check-icon"
+                    data-background-check-icon
+                    aria-hidden="true"
+                  >
+                    ✖
+                  </span>
+                  <span data-background-check-text>
+                    Background check not requested yet.
+                  </span>
+                </span>
+              </div>
+              <p
+                class="note background-check-message hidden"
+                data-background-check-message
+              ></p>
+              <p
+                class="note background-check-details hidden"
+                data-background-check-details
+              ></p>
               <dl class="profile-meta">
                 <div>
                   <dt>Pet focus</dt>

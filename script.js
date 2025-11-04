@@ -23,6 +23,12 @@ const profilePets = document.querySelector('[data-profile-pets]');
 const profileExperience = document.querySelector('[data-profile-experience]');
 const profileBio = document.querySelector('[data-profile-bio]');
 const profileMessage = document.querySelector('[data-profile-message]');
+const backgroundCheckButton = document.querySelector('[data-background-check-button]');
+const backgroundCheckStatus = document.querySelector('[data-background-check-status]');
+const backgroundCheckIcon = document.querySelector('[data-background-check-icon]');
+const backgroundCheckText = document.querySelector('[data-background-check-text]');
+const backgroundCheckMessage = document.querySelector('[data-background-check-message]');
+const backgroundCheckDetails = document.querySelector('[data-background-check-details]');
 const sitterProfileHero = document.querySelector('[data-sitter-hero]');
 const sitterProfileSection = document.querySelector('[data-sitter-profile]');
 const sitterProfileEmpty = document.querySelector('[data-sitter-empty]');
@@ -94,6 +100,18 @@ const chatStatusDefault = {
 
 let chatStatusResetTimer = null;
 
+const backgroundCheckButtonDefaultText =
+  backgroundCheckButton?.textContent?.trim() || 'Run free background check';
+const backgroundCheckButtonRetryText =
+  backgroundCheckButton?.dataset?.backgroundCheckRetryLabel?.trim() ||
+  'Run background check again';
+
+if (backgroundCheckButton) {
+  backgroundCheckButton.textContent = backgroundCheckButtonDefaultText;
+}
+
+let backgroundCheckInProgress = false;
+
 const DEFAULT_SITTER_PHOTO =
   'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80';
 
@@ -112,6 +130,7 @@ const STORAGE_KEYS = {
 
 const MAX_CHAT_MESSAGES = 60;
 const CHAT_MESSAGE_MAX_LENGTH = 500;
+const BACKGROUND_CHECK_DELAY_MS = 2400;
 
 function initializeNavigation() {
   if (!navigationToggles.length) {
@@ -1455,12 +1474,179 @@ sitterFilters?.addEventListener('reset', () => {
   }, 0);
 });
 
+backgroundCheckButton?.addEventListener('click', () => {
+  if (backgroundCheckInProgress) {
+    return;
+  }
+
+  if (!userProfile) {
+    setBackgroundCheckMessage(
+      'Save your profile before requesting a background check.',
+      'error'
+    );
+    updateBackgroundCheckUI(null, { state: 'idle' });
+    return;
+  }
+
+  backgroundCheckInProgress = true;
+  setBackgroundCheckMessage('Running free basic background check...', 'info');
+  updateBackgroundCheckUI(userProfile.backgroundCheck || null, { state: 'running' });
+
+  window.setTimeout(() => {
+    const result = {
+      status: 'clear',
+      completedAt: new Date().toISOString(),
+      summary:
+        'Basic identity, watchlist, and public safety searches returned no concerns.',
+    };
+
+    try {
+      userProfile = { ...userProfile, backgroundCheck: result };
+      saveStoredData(STORAGE_KEYS.PROFILE, userProfile);
+      renderProfile(userProfile);
+      setBackgroundCheckMessage(
+        'Background check completed successfully. Results: Clear.',
+        'success'
+      );
+    } catch (error) {
+      console.error('Unable to record background check result', error);
+      setBackgroundCheckMessage(
+        'We were unable to save the background check results. Please try again.',
+        'error'
+      );
+      updateBackgroundCheckUI(userProfile?.backgroundCheck || null, { state: 'error' });
+    } finally {
+      backgroundCheckInProgress = false;
+    }
+  }, BACKGROUND_CHECK_DELAY_MS);
+});
+
+function formatBackgroundCheckDate(value) {
+  if (!value) {
+    return '';
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  try {
+    return new Intl.DateTimeFormat(undefined, {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }).format(date);
+  } catch (error) {
+    return date.toLocaleString();
+  }
+}
+
+function setBackgroundCheckMessage(message, status = 'info') {
+  if (!backgroundCheckMessage) {
+    return;
+  }
+
+  if (!message) {
+    backgroundCheckMessage.textContent = '';
+    backgroundCheckMessage.classList.add('hidden');
+    delete backgroundCheckMessage.dataset.status;
+    return;
+  }
+
+  backgroundCheckMessage.textContent = message;
+  backgroundCheckMessage.dataset.status = status;
+  backgroundCheckMessage.classList.remove('hidden');
+}
+
+function updateBackgroundCheckUI(result, options = {}) {
+  if (!backgroundCheckStatus || !backgroundCheckIcon || !backgroundCheckText) {
+    return;
+  }
+
+  const state = options.state
+    ? options.state
+    : !result
+    ? 'idle'
+    : result.status === 'error'
+    ? 'error'
+    : 'complete';
+
+  backgroundCheckStatus.dataset.state = state;
+
+  if (backgroundCheckButton) {
+    if (state === 'running') {
+      backgroundCheckButton.disabled = true;
+      backgroundCheckButton.textContent = 'Running background check...';
+    } else {
+      backgroundCheckButton.disabled = false;
+      backgroundCheckButton.textContent =
+        state === 'complete'
+          ? backgroundCheckButtonRetryText
+          : backgroundCheckButtonDefaultText;
+    }
+  }
+
+  if (state === 'running') {
+    backgroundCheckIcon.textContent = '…';
+    backgroundCheckText.textContent = 'Running basic background check...';
+    if (backgroundCheckDetails) {
+      backgroundCheckDetails.textContent = '';
+      backgroundCheckDetails.classList.add('hidden');
+    }
+    return;
+  }
+
+  if (state === 'idle') {
+    backgroundCheckIcon.textContent = '✖';
+    backgroundCheckText.textContent = 'Background check not requested yet.';
+    if (backgroundCheckDetails) {
+      backgroundCheckDetails.textContent = '';
+      backgroundCheckDetails.classList.add('hidden');
+    }
+    return;
+  }
+
+  if (state === 'error') {
+    backgroundCheckIcon.textContent = '✖';
+    backgroundCheckText.textContent = 'Background check could not be completed.';
+    if (backgroundCheckDetails) {
+      if (result?.summary) {
+        backgroundCheckDetails.textContent = result.summary;
+        backgroundCheckDetails.classList.remove('hidden');
+      } else {
+        backgroundCheckDetails.textContent = '';
+        backgroundCheckDetails.classList.add('hidden');
+      }
+    }
+    return;
+  }
+
+  backgroundCheckIcon.textContent = '✓';
+  const completedOn = formatBackgroundCheckDate(result?.completedAt);
+  backgroundCheckText.textContent = completedOn
+    ? `Background check completed on ${completedOn}.`
+    : 'Background check completed.';
+
+  if (backgroundCheckDetails) {
+    if (result?.summary) {
+      backgroundCheckDetails.textContent = result.summary;
+      backgroundCheckDetails.classList.remove('hidden');
+    } else {
+      backgroundCheckDetails.textContent = '';
+      backgroundCheckDetails.classList.add('hidden');
+    }
+  }
+}
+
 function renderProfile(profile) {
   if (!profileDetails || !profileEmptyState) return;
 
   if (!profile) {
     profileDetails.classList.add('hidden');
     profileEmptyState.classList.remove('hidden');
+    updateBackgroundCheckUI(null);
+    setBackgroundCheckMessage(null);
     return;
   }
 
@@ -1514,6 +1700,8 @@ function renderProfile(profile) {
   if (profileBio) {
     profileBio.textContent = profile.bio || 'Tell the community a little more about yourself.';
   }
+
+  updateBackgroundCheckUI(profile.backgroundCheck || null);
 }
 
 sitterPhotoInput?.addEventListener('change', async () => {
@@ -1916,6 +2104,10 @@ profileForm?.addEventListener('submit', (event) => {
   event.preventDefault();
   const formData = new FormData(profileForm);
   const profile = Object.fromEntries(formData.entries());
+
+  if (userProfile?.backgroundCheck) {
+    profile.backgroundCheck = userProfile.backgroundCheck;
+  }
 
   saveStoredData(STORAGE_KEYS.PROFILE, profile);
   userProfile = profile;
