@@ -3,6 +3,12 @@ const sitterList = document.getElementById('sitter-list');
 const sitterFilters = document.getElementById('sitter-filters');
 const questionForm = document.getElementById('question-form');
 const questionsList = document.getElementById('questions-list');
+const chatForm = document.getElementById('chat-form');
+const chatMessagesElement = document.getElementById('chat-messages');
+const chatWindow = document.querySelector('[data-chat-window]');
+const chatStatusMessage = document.querySelector('[data-chat-status]');
+const chatNameInput = chatForm ? chatForm.querySelector('input[name="chatName"]') : null;
+const chatMessageInput = chatForm ? chatForm.querySelector('textarea[name="chatMessage"]') : null;
 const videoForm = document.getElementById('video-form');
 const videoFrame = document.getElementById('video-frame');
 const profileForm = document.getElementById('profile-form');
@@ -81,6 +87,13 @@ const sitterFormMessage = sitterForm?.querySelector('[data-sitter-form-message]'
 const NEWSLETTER_DEFAULT_RECIPIENT = 'subscribe@pawnamics.com';
 const NEWSLETTER_DEFAULT_CC = 'pawnamics.contact@gmail.com';
 
+const chatStatusDefault = {
+  message: chatStatusMessage?.textContent?.trim() || '',
+  type: chatStatusMessage?.dataset?.status || 'info',
+};
+
+let chatStatusResetTimer = null;
+
 const DEFAULT_SITTER_PHOTO =
   'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80';
 
@@ -90,11 +103,15 @@ const DEFAULT_SITTER_HERO =
 const STORAGE_KEYS = {
   SITTERS: 'pawnamics_sitters',
   QUESTIONS: 'pawnamics_questions',
+  CHAT_MESSAGES: 'pawnamics_chat_messages',
   PROFILE: 'pawnamics_user_profile',
   SUBSCRIPTIONS: 'pawnamics_sitter_subscriptions',
   THEME: 'pawnamics_theme',
   ACTIVE_SITTER: 'pawnamics_active_sitter',
 };
+
+const MAX_CHAT_MESSAGES = 60;
+const CHAT_MESSAGE_MAX_LENGTH = 500;
 
 function initializeNavigation() {
   if (!navigationToggles.length) {
@@ -861,6 +878,121 @@ function setFormMessage(element, message, type = 'info') {
   element.classList.add(typeClass);
 }
 
+function resetChatStatus() {
+  if (!chatStatusMessage) {
+    return;
+  }
+
+  if (!chatStatusDefault.message) {
+    chatStatusMessage.textContent = '';
+    chatStatusMessage.dataset.status = '';
+    chatStatusMessage.classList.add('hidden');
+    return;
+  }
+
+  chatStatusMessage.textContent = chatStatusDefault.message;
+  chatStatusMessage.dataset.status = chatStatusDefault.type || 'info';
+  chatStatusMessage.classList.remove('hidden');
+}
+
+function setChatStatus(message, type = 'info', options = {}) {
+  if (!chatStatusMessage) {
+    return;
+  }
+
+  const { autoReset = false } = options;
+
+  if (chatStatusResetTimer) {
+    window.clearTimeout(chatStatusResetTimer);
+    chatStatusResetTimer = null;
+  }
+
+  if (!message) {
+    chatStatusMessage.textContent = '';
+    chatStatusMessage.dataset.status = '';
+    chatStatusMessage.classList.add('hidden');
+    return;
+  }
+
+  chatStatusMessage.textContent = message;
+  chatStatusMessage.dataset.status = type;
+  chatStatusMessage.classList.remove('hidden');
+
+  if (autoReset && (chatStatusDefault.message || chatStatusDefault.type)) {
+    chatStatusResetTimer = window.setTimeout(() => {
+      resetChatStatus();
+    }, 2400);
+  }
+}
+
+function isChatScrolledToBottom(element) {
+  if (!element) {
+    return false;
+  }
+  const threshold = 24;
+  const distanceFromBottom = element.scrollHeight - (element.scrollTop + element.clientHeight);
+  return distanceFromBottom <= threshold;
+}
+
+function createChatMessageItem(message) {
+  const item = document.createElement('li');
+  item.className = 'chat-message';
+
+  const header = document.createElement('div');
+  header.className = 'chat-message-header';
+
+  const author = document.createElement('strong');
+  author.textContent = message.author;
+
+  const timestamp = document.createElement('time');
+  timestamp.setAttribute('datetime', message.created);
+  timestamp.textContent = new Date(message.created).toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
+  const body = document.createElement('p');
+  body.className = 'chat-text';
+  body.textContent = message.text;
+
+  header.appendChild(author);
+  header.appendChild(timestamp);
+  item.appendChild(header);
+  item.appendChild(body);
+
+  return item;
+}
+
+function renderChatMessages(messages, options = {}) {
+  if (!chatMessagesElement) {
+    return;
+  }
+
+  const { forceScroll = false } = options;
+  const shouldStick = forceScroll || isChatScrolledToBottom(chatWindow);
+
+  chatMessagesElement.innerHTML = '';
+
+  if (!messages.length) {
+    const emptyState = document.createElement('li');
+    emptyState.className = 'note';
+    emptyState.textContent = 'No chat messages yet. Say hello to the community!';
+    chatMessagesElement.appendChild(emptyState);
+    if (forceScroll && chatWindow) {
+      chatWindow.scrollTop = 0;
+    }
+    return;
+  }
+
+  messages.forEach((message) => {
+    chatMessagesElement.appendChild(createChatMessageItem(message));
+  });
+
+  if (chatWindow && (forceScroll || shouldStick)) {
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+  }
+}
+
 function findSitterByUsername(username) {
   if (!username) return undefined;
   const normalized = username.trim().toLowerCase();
@@ -1242,6 +1374,13 @@ function renderSitterProfilePage() {
 
 const sitters = loadStoredData(STORAGE_KEYS.SITTERS);
 const questions = loadStoredData(STORAGE_KEYS.QUESTIONS);
+let chatMessagesData = loadStoredData(STORAGE_KEYS.CHAT_MESSAGES);
+if (!Array.isArray(chatMessagesData)) {
+  chatMessagesData = [];
+} else if (chatMessagesData.length > MAX_CHAT_MESSAGES) {
+  chatMessagesData = chatMessagesData.slice(-MAX_CHAT_MESSAGES);
+  saveStoredData(STORAGE_KEYS.CHAT_MESSAGES, chatMessagesData);
+}
 const subscriptions = loadStoredData(STORAGE_KEYS.SUBSCRIPTIONS);
 let userProfile = loadStoredData(STORAGE_KEYS.PROFILE, null);
 let activeSitterAccount = loadStoredData(STORAGE_KEYS.ACTIVE_SITTER, null);
@@ -1277,9 +1416,10 @@ if (
 if (sitterFilters) {
   updateSitterFilters();
 } else {
-  renderSitterDirectory();
+renderSitterDirectory();
 }
 renderQuestions(questions);
+renderChatMessages(chatMessagesData, { forceScroll: true });
 renderProfile(userProfile);
 renderSitterProfilePage();
 if (sitterPhotoPreview) {
@@ -1684,6 +1824,85 @@ questionForm?.addEventListener('submit', (event) => {
   saveStoredData(STORAGE_KEYS.QUESTIONS, questions);
   renderQuestions(questions);
   questionForm.reset();
+});
+
+chatForm?.addEventListener('submit', (event) => {
+  event.preventDefault();
+
+  if (!chatMessageInput) {
+    return;
+  }
+
+  const nameValue = chatNameInput ? chatNameInput.value.trim() : '';
+  const messageValue = chatMessageInput.value.trim();
+
+  if (!messageValue.length) {
+    setChatStatus('Enter a message before sending it to the community.', 'error');
+    chatMessageInput.focus();
+    return;
+  }
+
+  if (messageValue.length > CHAT_MESSAGE_MAX_LENGTH) {
+    setChatStatus(
+      `Messages are limited to ${CHAT_MESSAGE_MAX_LENGTH} characters.`,
+      'error'
+    );
+    chatMessageInput.focus();
+    return;
+  }
+
+  const author = nameValue.length ? nameValue : 'Anonymous';
+  const entry = {
+    id: generateId('chat'),
+    author,
+    text: messageValue,
+    created: new Date().toISOString(),
+  };
+
+  chatMessagesData = [...chatMessagesData, entry];
+  if (chatMessagesData.length > MAX_CHAT_MESSAGES) {
+    chatMessagesData = chatMessagesData.slice(-MAX_CHAT_MESSAGES);
+  }
+
+  saveStoredData(STORAGE_KEYS.CHAT_MESSAGES, chatMessagesData);
+  renderChatMessages(chatMessagesData, { forceScroll: true });
+
+  chatMessageInput.value = '';
+  chatMessageInput.focus();
+
+  setChatStatus('Message sent!', 'success', { autoReset: true });
+});
+
+chatForm?.addEventListener('input', () => {
+  if (!chatStatusMessage) {
+    return;
+  }
+  if (chatStatusMessage.dataset.status === 'error') {
+    resetChatStatus();
+  }
+});
+
+window.addEventListener('storage', (event) => {
+  if (event.key !== STORAGE_KEYS.CHAT_MESSAGES) {
+    return;
+  }
+
+  try {
+    chatMessagesData = event.newValue ? JSON.parse(event.newValue) : [];
+  } catch (error) {
+    console.warn('Unable to parse chat messages from storage', error);
+    chatMessagesData = [];
+  }
+
+  if (!Array.isArray(chatMessagesData)) {
+    chatMessagesData = [];
+  }
+
+  if (chatMessagesData.length > MAX_CHAT_MESSAGES) {
+    chatMessagesData = chatMessagesData.slice(-MAX_CHAT_MESSAGES);
+  }
+
+  renderChatMessages(chatMessagesData);
 });
 
 videoForm?.addEventListener('submit', (event) => {

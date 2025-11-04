@@ -112,9 +112,52 @@
               <button type="submit" class="btn full">Post Question</button>
             </form>
           </div>
-          <div class="card" id="question-board">
-            <h3>Latest Questions</h3>
-            <ul id="questions-list" class="question-list"></ul>
+          <div class="community-sidebar">
+            <div class="card" id="question-board">
+              <h3>Latest Questions</h3>
+              <ul id="questions-list" class="question-list"></ul>
+            </div>
+            <div class="card chat-card" id="live-chat">
+              <div class="chat-header">
+                <h3>Live Community Chat</h3>
+                <p>Start a real-time conversation with other PawNamics members.</p>
+              </div>
+              <div class="chat-window" data-chat-window>
+                <ul
+                  id="chat-messages"
+                  class="chat-messages"
+                  role="list"
+                  aria-live="polite"
+                  aria-label="Live community chat messages"
+                ></ul>
+              </div>
+              <form id="chat-form" class="chat-form" autocomplete="off">
+                <div class="chat-input-group">
+                  <label class="sr-only" for="chat-name">Your name</label>
+                  <input
+                    id="chat-name"
+                    name="chatName"
+                    type="text"
+                    placeholder="Your name"
+                    autocomplete="name"
+                  />
+                  <label class="sr-only" for="chat-message">Message</label>
+                  <textarea
+                    id="chat-message"
+                    name="chatMessage"
+                    rows="2"
+                    required
+                    placeholder="Share an update, ask a quick question, or say hi!"
+                  ></textarea>
+                </div>
+                <div class="chat-form-actions">
+                  <p class="chat-status" data-chat-status data-status="info" role="status">
+                    Messages sync instantly across open PawNamics tabs.
+                  </p>
+                  <button type="submit" class="btn">Send Message</button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       </section>
