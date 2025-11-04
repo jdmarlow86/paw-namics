@@ -23,6 +23,19 @@ const profilePets = document.querySelector('[data-profile-pets]');
 const profileExperience = document.querySelector('[data-profile-experience]');
 const profileBio = document.querySelector('[data-profile-bio]');
 const profileMessage = document.querySelector('[data-profile-message]');
+const profileMenu = document.querySelector('[data-profile-menu]');
+const profileMenuTrigger = document.querySelector('[data-profile-menu-trigger]');
+const profileMenuDropdown = document.querySelector('[data-profile-menu-dropdown]');
+const profileMenuAvatar = document.querySelector('[data-profile-menu-avatar]');
+const profileMenuLogout = document.querySelector('[data-profile-menu-logout]');
+const profileMenuSettings = document.querySelector('[data-profile-menu-settings]');
+const settingsModal = document.querySelector('[data-settings-modal]');
+const settingsModalDialog = settingsModal?.querySelector('[data-settings-modal-dialog]');
+const settingsModalDismissElements = settingsModal
+  ? Array.from(settingsModal.querySelectorAll('[data-settings-modal-dismiss]'))
+  : [];
+const settingsForm = settingsModal?.querySelector('[data-settings-form]');
+const settingsMessage = settingsModal?.querySelector('[data-settings-message]');
 const profileHighlightSection = document.querySelector('[data-profile-highlight]');
 const profileHighlightAvatar = document.querySelector('[data-profile-highlight-avatar]');
 const profileHighlightName = document.querySelector('[data-profile-highlight-name]');
@@ -111,6 +124,187 @@ const chatStatusDefault = {
 
 let chatStatusResetTimer = null;
 
+let profileMenuOpen = false;
+let isSettingsModalOpen = false;
+let pendingSettingsCloseTimer = null;
+
+function setProfileMenuOpen(open) {
+  if (!profileMenu || !profileMenuTrigger) {
+    profileMenuOpen = false;
+    return;
+  }
+
+  if (profileMenu.classList.contains('hidden')) {
+    profileMenuOpen = false;
+    profileMenu.classList.remove('is-open');
+    profileMenuTrigger.setAttribute('aria-expanded', 'false');
+    return;
+  }
+
+  profileMenuOpen = Boolean(open);
+  profileMenu.classList.toggle('is-open', profileMenuOpen);
+  profileMenuTrigger.setAttribute('aria-expanded', profileMenuOpen ? 'true' : 'false');
+}
+
+function focusProfileMenuItem(index = 0) {
+  if (!profileMenuDropdown) {
+    return;
+  }
+
+  const focusable = Array.from(profileMenuDropdown.querySelectorAll('a, button'));
+  if (!focusable.length) {
+    return;
+  }
+
+  const clampedIndex = Math.max(0, Math.min(index, focusable.length - 1));
+  const target = focusable[clampedIndex];
+  if (typeof target.focus === 'function') {
+    target.focus();
+  }
+}
+
+function updateProfileMenu(profile) {
+  if (!profileMenu || !profileMenuTrigger || !profileMenuAvatar) {
+    return;
+  }
+
+  if (!profile) {
+    profileMenu.classList.add('hidden');
+    profileMenuTrigger.setAttribute('aria-label', 'Open account menu');
+    profileMenuAvatar.src = DEFAULT_PROFILE_AVATAR;
+    profileMenuAvatar.alt = 'Your profile avatar';
+    setProfileMenuOpen(false);
+    return;
+  }
+
+  const avatarUrl = profile.photo || DEFAULT_PROFILE_AVATAR;
+  profileMenuAvatar.src = avatarUrl;
+  profileMenuAvatar.alt = profile.name
+    ? `${profile.name}'s profile photo`
+    : 'Your profile avatar';
+  profileMenuTrigger.setAttribute(
+    'aria-label',
+    profile.name ? `${profile.name}'s account menu` : 'Open account menu'
+  );
+  profileMenu.classList.remove('hidden');
+  setProfileMenuOpen(false);
+}
+
+function applySettingsToForm() {
+  if (!settingsForm) {
+    return;
+  }
+
+  Object.keys(DEFAULT_USER_SETTINGS).forEach((key) => {
+    const element = settingsForm.elements.namedItem(key);
+    if (!element) {
+      return;
+    }
+
+    if (typeof element.length === 'number' && typeof element.item === 'function') {
+      Array.from(element).forEach((item) => {
+        if (item && 'checked' in item) {
+          item.checked = Boolean(userSettings?.[key]);
+        }
+      });
+      return;
+    }
+
+    if ('checked' in element) {
+      element.checked = Boolean(userSettings?.[key]);
+    }
+  });
+}
+
+function showSettingsMessage(message, status = 'info') {
+  if (!settingsMessage) {
+    return;
+  }
+
+  if (!message) {
+    settingsMessage.textContent = '';
+    settingsMessage.classList.add('hidden');
+    delete settingsMessage.dataset.status;
+    return;
+  }
+
+  settingsMessage.textContent = message;
+  settingsMessage.dataset.status = status;
+  settingsMessage.classList.remove('hidden');
+}
+
+function openSettingsModal() {
+  if (!settingsModal) {
+    return;
+  }
+
+  if (pendingSettingsCloseTimer) {
+    window.clearTimeout(pendingSettingsCloseTimer);
+    pendingSettingsCloseTimer = null;
+  }
+
+  applySettingsToForm();
+  showSettingsMessage('');
+  settingsModal.classList.add('is-open');
+  settingsModal.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('modal-open');
+  isSettingsModalOpen = true;
+
+  window.setTimeout(() => {
+    settingsModalDialog?.focus();
+  }, 0);
+}
+
+function closeSettingsModal(options = {}) {
+  if (!settingsModal) {
+    return;
+  }
+
+  if (pendingSettingsCloseTimer) {
+    window.clearTimeout(pendingSettingsCloseTimer);
+    pendingSettingsCloseTimer = null;
+  }
+
+  settingsModal.classList.remove('is-open');
+  settingsModal.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('modal-open');
+  isSettingsModalOpen = false;
+  showSettingsMessage('');
+
+  if (options.focusTrigger) {
+    profileMenuTrigger?.focus();
+  }
+}
+
+function handleProfileLogout() {
+  setProfileMenuOpen(false);
+  userProfile = null;
+
+  try {
+    localStorage.removeItem(STORAGE_KEYS.PROFILE);
+  } catch (error) {
+    console.warn('Unable to remove profile from storage', error);
+  }
+
+  renderProfile(null);
+  backgroundCheckInProgress = false;
+
+  if (profileForm) {
+    profileForm.reset();
+  }
+
+  if (profileMessage) {
+    profileMessage.textContent =
+      'You have been logged out and your profile data was cleared.';
+    profileMessage.classList.remove('hidden');
+    window.setTimeout(() => {
+      profileMessage?.classList.add('hidden');
+    }, 4000);
+  } else {
+    window.alert('You have been logged out. Save a profile again to see it in the menu.');
+  }
+}
+
 const backgroundCheckButtonDefaultText =
   backgroundCheckButton?.textContent?.trim() || 'Run free background check';
 const backgroundCheckButtonRetryText =
@@ -129,11 +323,21 @@ const DEFAULT_SITTER_PHOTO =
 const DEFAULT_SITTER_HERO =
   'https://images.unsplash.com/photo-1525253086316-d0c936c814f8?auto=format&fit=crop&w=1200&q=80';
 
+const DEFAULT_PROFILE_AVATAR =
+  'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=200&q=80';
+
+const DEFAULT_USER_SETTINGS = {
+  emailUpdates: true,
+  smsUpdates: false,
+  rememberDevice: true,
+};
+
 const STORAGE_KEYS = {
   SITTERS: 'pawnamics_sitters',
   QUESTIONS: 'pawnamics_questions',
   CHAT_MESSAGES: 'pawnamics_chat_messages',
   PROFILE: 'pawnamics_user_profile',
+  SETTINGS: 'pawnamics_user_settings',
   SUBSCRIPTIONS: 'pawnamics_sitter_subscriptions',
   THEME: 'pawnamics_theme',
   ACTIVE_SITTER: 'pawnamics_active_sitter',
@@ -1413,6 +1617,7 @@ if (!Array.isArray(chatMessagesData)) {
 }
 const subscriptions = loadStoredData(STORAGE_KEYS.SUBSCRIPTIONS);
 let userProfile = loadStoredData(STORAGE_KEYS.PROFILE, null);
+let userSettings = loadStoredData(STORAGE_KEYS.SETTINGS, DEFAULT_USER_SETTINGS);
 let activeSitterAccount = loadStoredData(STORAGE_KEYS.ACTIVE_SITTER, null);
 let activeSitterFilters = {
   location: '',
@@ -1433,6 +1638,14 @@ sitters.forEach((entry) => {
 
 if (sitterDataUpdated) {
   saveStoredData(STORAGE_KEYS.SITTERS, sitters);
+}
+
+if (!userSettings || typeof userSettings !== 'object' || Array.isArray(userSettings)) {
+  userSettings = { ...DEFAULT_USER_SETTINGS };
+  saveStoredData(STORAGE_KEYS.SETTINGS, userSettings);
+} else {
+  userSettings = { ...DEFAULT_USER_SETTINGS, ...userSettings };
+  saveStoredData(STORAGE_KEYS.SETTINGS, userSettings);
 }
 
 if (
@@ -1660,11 +1873,15 @@ function updateBackgroundCheckUI(result, options = {}) {
 }
 
 function renderProfile(profile) {
-  if (!profileDetails || !profileEmptyState) return;
+  updateProfileMenu(profile);
+
+  const hasProfilePreview = Boolean(profileDetails && profileEmptyState);
 
   if (!profile) {
-    profileDetails.classList.add('hidden');
-    profileEmptyState.classList.remove('hidden');
+    if (hasProfilePreview) {
+      profileDetails.classList.add('hidden');
+      profileEmptyState.classList.remove('hidden');
+    }
     updateBackgroundCheckUI(null);
     setBackgroundCheckMessage(null);
     if (profileHighlightSection) {
@@ -1673,56 +1890,59 @@ function renderProfile(profile) {
     return;
   }
 
-  const avatarUrl = profile.photo ||
-    'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=400&q=80';
+  const avatarUrl = profile.photo || DEFAULT_PROFILE_AVATAR;
   const backgroundCheckComplete = profile.backgroundCheck?.status === 'clear';
 
-  profileEmptyState.classList.add('hidden');
-  profileDetails.classList.remove('hidden');
+  if (hasProfilePreview) {
+    profileEmptyState.classList.add('hidden');
+    profileDetails.classList.remove('hidden');
 
-  if (profileAvatar) {
-    profileAvatar.src = avatarUrl;
-    profileAvatar.alt = profile.name
-      ? `${profile.name}'s profile photo`
-      : 'Profile avatar';
-  }
-
-  if (profileName) {
-    profileName.textContent = profile.name || 'Your Name';
-  }
-
-  if (profileHeadline) {
-    profileHeadline.textContent = profile.headline || 'Add a short headline to introduce yourself.';
-  }
-
-  if (profileLocation) {
-    profileLocation.textContent = profile.location || 'Location not provided';
-  }
-
-  if (profileEmail) {
-    if (profile.email) {
-      profileEmail.textContent = profile.email;
-      profileEmail.href = `mailto:${profile.email}`;
-      profileEmail.classList.remove('hidden');
-    } else {
-      profileEmail.textContent = '';
-      profileEmail.href = '#';
-      profileEmail.classList.add('hidden');
+    if (profileAvatar) {
+      profileAvatar.src = avatarUrl;
+      profileAvatar.alt = profile.name
+        ? `${profile.name}'s profile photo`
+        : 'Profile avatar';
     }
-  }
 
-  if (profilePets) {
-    profilePets.textContent = profile.petFocus || 'Share which pets you care for.';
-  }
+    if (profileName) {
+      profileName.textContent = profile.name || 'Your Name';
+    }
 
-  if (profileExperience) {
-    profileExperience.textContent = profile.experience
-      ? `${profile.experience} years`
-      : 'Experience not listed yet';
-  }
+    if (profileHeadline) {
+      profileHeadline.textContent =
+        profile.headline || 'Add a short headline to introduce yourself.';
+    }
 
-  if (profileBio) {
-    profileBio.textContent = profile.bio || 'Tell the community a little more about yourself.';
+    if (profileLocation) {
+      profileLocation.textContent = profile.location || 'Location not provided';
+    }
+
+    if (profileEmail) {
+      if (profile.email) {
+        profileEmail.textContent = profile.email;
+        profileEmail.href = `mailto:${profile.email}`;
+        profileEmail.classList.remove('hidden');
+      } else {
+        profileEmail.textContent = '';
+        profileEmail.href = '#';
+        profileEmail.classList.add('hidden');
+      }
+    }
+
+    if (profilePets) {
+      profilePets.textContent = profile.petFocus || 'Share which pets you care for.';
+    }
+
+    if (profileExperience) {
+      profileExperience.textContent = profile.experience
+        ? `${profile.experience} years`
+        : 'Experience not listed yet';
+    }
+
+    if (profileBio) {
+      profileBio.textContent =
+        profile.bio || 'Tell the community a little more about yourself.';
+    }
   }
 
   updateBackgroundCheckUI(profile.backgroundCheck || null);
@@ -1800,7 +2020,6 @@ function renderProfile(profile) {
     }
   }
 }
-
 sitterPhotoInput?.addEventListener('change', async () => {
   const selectedFile = sitterPhotoInput.files?.[0];
   await updateSitterPhotoPreview(selectedFile);
@@ -2250,6 +2469,115 @@ profileDeleteButtons.forEach((button) => {
     }
   });
 });
+
+profileMenuTrigger?.addEventListener('click', (event) => {
+  if (profileMenu?.classList.contains('hidden')) {
+    return;
+  }
+  event.preventDefault();
+  event.stopPropagation();
+  const shouldOpen = !profileMenuOpen;
+  setProfileMenuOpen(shouldOpen);
+  if (shouldOpen) {
+    focusProfileMenuItem(0);
+  }
+});
+
+profileMenuTrigger?.addEventListener('keydown', (event) => {
+  if (profileMenu?.classList.contains('hidden')) {
+    return;
+  }
+
+  if (event.key === 'ArrowDown') {
+    event.preventDefault();
+    setProfileMenuOpen(true);
+    focusProfileMenuItem(0);
+  } else if (event.key === 'Escape' && profileMenuOpen) {
+    event.preventDefault();
+    setProfileMenuOpen(false);
+  }
+});
+
+profileMenuDropdown?.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') {
+    setProfileMenuOpen(false);
+    profileMenuTrigger?.focus();
+  }
+});
+
+document.addEventListener('click', (event) => {
+  if (!profileMenuOpen || !profileMenu) {
+    return;
+  }
+
+  if (profileMenu.contains(event.target)) {
+    return;
+  }
+
+  setProfileMenuOpen(false);
+});
+
+document.addEventListener('keydown', (event) => {
+  if (event.key !== 'Escape') {
+    return;
+  }
+
+  if (profileMenuOpen) {
+    setProfileMenuOpen(false);
+    profileMenuTrigger?.focus();
+  }
+
+  if (isSettingsModalOpen) {
+    closeSettingsModal({ focusTrigger: true });
+  }
+});
+
+profileMenuSettings?.addEventListener('click', () => {
+  setProfileMenuOpen(false);
+  openSettingsModal();
+});
+
+profileMenuLogout?.addEventListener('click', () => {
+  handleProfileLogout();
+});
+
+settingsModalDismissElements.forEach((element) => {
+  element.addEventListener('click', () => {
+    closeSettingsModal({ focusTrigger: true });
+  });
+});
+
+settingsForm?.addEventListener('submit', (event) => {
+  event.preventDefault();
+
+  const formData = new FormData(settingsForm);
+  const updatedSettings = { ...DEFAULT_USER_SETTINGS };
+
+  Object.keys(DEFAULT_USER_SETTINGS).forEach((key) => {
+    updatedSettings[key] = formData.has(key);
+  });
+
+  const hasChanges = Object.keys(updatedSettings).some(
+    (key) => Boolean(userSettings?.[key]) !== Boolean(updatedSettings[key])
+  );
+
+  userSettings = updatedSettings;
+  saveStoredData(STORAGE_KEYS.SETTINGS, userSettings);
+  applySettingsToForm();
+
+  showSettingsMessage(hasChanges ? 'Settings saved.' : 'No changes to save.', hasChanges ? 'success' : 'info');
+
+  if (pendingSettingsCloseTimer) {
+    window.clearTimeout(pendingSettingsCloseTimer);
+  }
+
+  pendingSettingsCloseTimer = window.setTimeout(() => {
+    closeSettingsModal({ focusTrigger: true });
+    pendingSettingsCloseTimer = null;
+  }, hasChanges ? 1400 : 1000);
+});
+
+applySettingsToForm();
 
 if (videoFrame) {
   const params = new URLSearchParams(window.location.search);

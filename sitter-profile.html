@@ -54,6 +54,33 @@
             <span class="sr-only">Toggle navigation</span>
             <span class="nav-toggle-icon" aria-hidden="true"></span>
           </button>
+          <div class="profile-menu hidden" data-profile-menu>
+            <button
+              class="profile-menu-trigger"
+              type="button"
+              aria-haspopup="true"
+              aria-expanded="false"
+              data-profile-menu-trigger
+            >
+              <span class="sr-only">Open account menu</span>
+              <img
+                src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=200&q=80"
+                alt="Your profile avatar"
+                data-profile-menu-avatar
+              />
+            </button>
+            <div class="profile-menu-dropdown" role="menu" data-profile-menu-dropdown>
+              <a class="profile-menu-item" href="profile.html" role="menuitem" data-profile-menu-edit
+                >Edit profile</a
+              >
+              <button class="profile-menu-item" type="button" role="menuitem" data-profile-menu-settings>
+                Settings
+              </button>
+              <button class="profile-menu-item" type="button" role="menuitem" data-profile-menu-logout>
+                Log out
+              </button>
+            </div>
+          </div>
         </div>
         <nav class="main-nav" id="primary-navigation" data-nav>
           <a href="index.html">Home</a>
@@ -244,6 +271,57 @@
         <p class="copyright">&copy; 2024 PawNamics. All rights reserved.</p>
       </div>
     </footer>
+
+    <div class="settings-modal" data-settings-modal aria-hidden="true">
+      <div class="settings-modal__backdrop" data-settings-modal-dismiss></div>
+      <div
+        class="settings-modal__dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="settings-modal-title"
+        tabindex="-1"
+        data-settings-modal-dialog
+      >
+        <div class="settings-modal__header">
+          <h2 id="settings-modal-title">Account settings</h2>
+          <button
+            class="settings-modal__close"
+            type="button"
+            aria-label="Close settings"
+            data-settings-modal-dismiss
+          >
+            &times;
+          </button>
+        </div>
+        <form class="settings-modal__form" data-settings-form>
+          <p class="settings-modal__description">
+            Manage how PawNamics keeps in touch with you across devices.
+          </p>
+          <fieldset class="settings-modal__section">
+            <legend>Notifications</legend>
+            <label class="settings-modal__option">
+              <input type="checkbox" name="emailUpdates" />
+              Email me important updates and sitter requests
+            </label>
+            <label class="settings-modal__option">
+              <input type="checkbox" name="smsUpdates" />
+              Send me text message alerts for new bookings
+            </label>
+            <label class="settings-modal__option">
+              <input type="checkbox" name="rememberDevice" />
+              Remember this device for quicker logins
+            </label>
+          </fieldset>
+          <div class="settings-modal__actions">
+            <p class="settings-modal__status hidden" data-settings-message role="status"></p>
+            <button class="btn btn-outline" type="button" data-settings-modal-dismiss>
+              Cancel
+            </button>
+            <button class="btn" type="submit">Save settings</button>
+          </div>
+        </form>
+      </div>
+    </div>
 
     <script src="script.js"></script>
   </body>
