@@ -339,7 +339,13 @@
                 updates delivered straight to your inbox.
               </p>
             </div>
-            <form class="newsletter-form" aria-label="Subscribe to newsletter">
+            <form
+              class="newsletter-form"
+              aria-label="Subscribe to newsletter"
+              data-newsletter-form
+              data-newsletter-recipient="subscribe@pawnamics.com"
+              data-newsletter-cc="pawnamics.contact@gmail.com"
+            >
               <label for="newsletter-name">Name</label>
               <input
                 type="text"
@@ -356,6 +362,13 @@
                 required
               />
               <button type="submit" class="btn">Subscribe</button>
+              <p
+                class="newsletter-status"
+                data-newsletter-status
+                role="status"
+                aria-live="polite"
+                hidden
+              ></p>
               <p class="newsletter-note">
                 We send one email per month and you can unsubscribe anytime.
               </p>
