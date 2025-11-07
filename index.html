@@ -160,6 +160,24 @@
             </div>
             <div class="filter-actions">
               <button type="reset" class="btn btn-outline">Clear filters</button>
+              <div class="admin-controls" data-admin-controls hidden>
+                <button
+                  type="button"
+                  class="btn btn-outline"
+                  data-admin-toggle
+                  aria-pressed="false"
+                  hidden
+                >
+                  Enable Admin Mode
+                </button>
+                <span
+                  class="admin-status"
+                  data-admin-status
+                  role="status"
+                  aria-live="polite"
+                  hidden
+                ></span>
+              </div>
             </div>
           </form>
           <div id="sitter-list" class="card-grid"></div>

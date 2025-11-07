@@ -114,6 +114,10 @@ const sitterPhotoHelpText =
 const loginForms = Array.from(document.querySelectorAll('[data-sitter-login-form]'));
 const sitterFormMessage = sitterForm?.querySelector('[data-sitter-form-message]');
 
+const adminControlsContainer = document.querySelector('[data-admin-controls]');
+const adminToggleButtons = Array.from(document.querySelectorAll('[data-admin-toggle]'));
+const adminStatusElement = document.querySelector('[data-admin-status]');
+
 const NEWSLETTER_DEFAULT_RECIPIENT = 'subscribe@pawnamics.com';
 const NEWSLETTER_DEFAULT_CC = 'pawnamics.contact@gmail.com';
 
@@ -127,6 +131,10 @@ let chatStatusResetTimer = null;
 let profileMenuOpen = false;
 let isSettingsModalOpen = false;
 let pendingSettingsCloseTimer = null;
+
+let adminModeEnabled = false;
+let adminStatusOverride = '';
+let adminStatusState = 'info';
 
 function setProfileMenuOpen(open) {
   if (!profileMenu || !profileMenuTrigger) {
@@ -342,6 +350,9 @@ const STORAGE_KEYS = {
   THEME: 'pawnamics_theme',
   ACTIVE_SITTER: 'pawnamics_active_sitter',
 };
+
+const ADMIN_MODE_STORAGE_KEY = 'pawnamics_admin_mode';
+const ADMIN_ACCESS_CODE = 'only-my-pawprints';
 
 const MAX_CHAT_MESSAGES = 60;
 const CHAT_MESSAGE_MAX_LENGTH = 500;
@@ -1091,6 +1102,140 @@ function saveStoredData(key, value) {
   }
 }
 
+function loadAdminModeState() {
+  try {
+    return localStorage.getItem(ADMIN_MODE_STORAGE_KEY) === 'true';
+  } catch (error) {
+    console.warn('Unable to read admin mode from storage', error);
+    return false;
+  }
+}
+
+function saveAdminModeState(enabled) {
+  try {
+    localStorage.setItem(ADMIN_MODE_STORAGE_KEY, enabled ? 'true' : 'false');
+  } catch (error) {
+    console.warn('Unable to save admin mode to storage', error);
+  }
+}
+
+function isAdminModeActive() {
+  return adminModeEnabled;
+}
+
+function updateAdminControlsUI(statusMessage = null, statusState = 'info') {
+  if (statusMessage !== null) {
+    adminStatusOverride = statusMessage;
+    adminStatusState = statusState || 'info';
+  } else if (!adminModeEnabled) {
+    adminStatusOverride = '';
+    adminStatusState = 'info';
+  }
+
+  const message = adminModeEnabled
+    ? adminStatusOverride || 'Admin mode active. Delete buttons are visible.'
+    : '';
+
+  if (adminStatusElement) {
+    if (message) {
+      adminStatusElement.textContent = message;
+      adminStatusElement.hidden = false;
+      adminStatusElement.dataset.state = adminStatusState;
+    } else {
+      adminStatusElement.textContent = '';
+      adminStatusElement.hidden = true;
+      delete adminStatusElement.dataset.state;
+    }
+  }
+
+  if (adminControlsContainer) {
+    adminControlsContainer.removeAttribute('hidden');
+  }
+
+  adminToggleButtons.forEach((button) => {
+    button.textContent = adminModeEnabled ? 'Disable Admin Mode' : 'Enable Admin Mode';
+    button.setAttribute('aria-pressed', adminModeEnabled ? 'true' : 'false');
+    button.removeAttribute('hidden');
+  });
+}
+
+function applyAdminMode(enabled, options = {}) {
+  const {
+    persist = true,
+    announce = false,
+    skipRender = false,
+    statusMessage = null,
+    statusState = 'info',
+  } = options;
+
+  const normalized = Boolean(enabled);
+  const stateChanged = adminModeEnabled !== normalized;
+
+  adminModeEnabled = normalized;
+
+  if (typeof document !== 'undefined' && document.body) {
+    document.body.classList.toggle('admin-mode', adminModeEnabled);
+  }
+
+  if (persist) {
+    saveAdminModeState(adminModeEnabled);
+  }
+
+  updateAdminControlsUI(statusMessage, statusState);
+
+  if ((stateChanged || statusMessage !== null) && !skipRender) {
+    renderSitterDirectory();
+  }
+
+  if (announce && stateChanged && typeof window !== 'undefined') {
+    window.alert(
+      adminModeEnabled
+        ? 'Admin mode enabled. Delete controls are now visible.'
+        : 'Admin mode disabled.'
+    );
+  }
+}
+
+function handleAdminToggle() {
+  if (isAdminModeActive()) {
+    applyAdminMode(false, { announce: true });
+    return;
+  }
+
+  const provided = window.prompt(
+    'Enter the admin access code to enable deletion controls:'
+  );
+
+  if (provided === null) {
+    return;
+  }
+
+  const normalized = provided.trim();
+  if (!normalized.length) {
+    return;
+  }
+
+  if (normalized === ADMIN_ACCESS_CODE) {
+    applyAdminMode(true, {
+      announce: true,
+      statusMessage: 'Admin mode enabled. Delete controls are now visible.',
+    });
+  } else {
+    window.alert('Incorrect admin access code.');
+  }
+}
+
+function initializeAdminControls() {
+  const storedState = loadAdminModeState();
+  applyAdminMode(storedState, { persist: false, skipRender: true });
+
+  if (adminToggleButtons.length) {
+    adminToggleButtons.forEach((button) => {
+      button.addEventListener('click', handleAdminToggle);
+    });
+  }
+}
+
 function setFormMessage(element, message, type = 'info') {
   if (!element) {
     return;
@@ -1303,6 +1448,7 @@ function createSitterCard(sitter) {
   ensureSitterIdentifier(sitter);
   const card = document.createElement('article');
   card.className = 'card sitter-card';
+  card.dataset.sitterId = sitter.id;
   const photoSource =
     (typeof sitter.photo === 'string' && sitter.photo.length && sitter.photo) ||
     (typeof sitter.photoUrl === 'string' && sitter.photoUrl.length && sitter.photoUrl) ||
@@ -1341,6 +1487,21 @@ function createSitterCard(sitter) {
     </div>
   `;
 
+  if (isAdminModeActive()) {
+    const actions = card.querySelector('.card-actions');
+    if (actions) {
+      const deleteButton = document.createElement('button');
+      deleteButton.type = 'button';
+      deleteButton.className = 'btn btn-danger';
+      deleteButton.dataset.adminOnly = 'true';
+      deleteButton.textContent = 'Delete Profile';
+      deleteButton.addEventListener('click', () => {
+        requestSitterRemoval(sitter);
+      });
+      actions.appendChild(deleteButton);
+    }
+  }
+
   const videoButton = card.querySelector('button');
   videoButton.addEventListener('click', () => {
     const roomName = `PawNamics-${sitter.name.replace(/\s+/g, '')}`;
@@ -1356,6 +1517,61 @@ function createSitterCard(sitter) {
   });
 
   return card;
+}
+
+function requestSitterRemoval(sitter) {
+  if (!isAdminModeActive() || !sitter || !sitter.id) {
+    return;
+  }
+
+  const sitterName = sitter.name || 'this sitter';
+  const confirmed = window.confirm(
+    `Are you sure you want to delete ${sitterName}'s profile? This cannot be undone.`
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  removeSitterById(sitter.id, sitterName);
+}
+
+function removeSitterById(sitterId, sitterName = '') {
+  if (!sitterId) {
+    return;
+  }
+
+  const sitterIndex = sitters.findIndex((entry) => entry.id === sitterId);
+
+  if (sitterIndex === -1) {
+    updateAdminControlsUI(
+      'We could not locate that sitter profile. Please refresh and try again.',
+      'warning'
+    );
+    return;
+  }
+
+  const [removedSitter] = sitters.splice(sitterIndex, 1);
+  saveStoredData(STORAGE_KEYS.SITTERS, sitters);
+
+  if (activeSitterAccount?.id === sitterId) {
+    activeSitterAccount = null;
+    saveStoredData(STORAGE_KEYS.ACTIVE_SITTER, activeSitterAccount);
+  }
+
+  if (activeSitterProfileId === sitterId) {
+    activeSitterProfileId = null;
+    activeSitterProfileName = '';
+  }
+
+  if (sitterProfileSection) {
+    renderSitterProfilePage();
+  }
+
+  renderSitterDirectory();
+
+  const displayName = sitterName || removedSitter?.name || 'The sitter profile';
+  updateAdminControlsUI(`${displayName} has been removed from the directory.`, 'success');
 }
 
 function renderSitters(sitters, emptyMessage) {
@@ -1656,10 +1872,12 @@ if (
   saveStoredData(STORAGE_KEYS.ACTIVE_SITTER, null);
 }
 
+initializeAdminControls();
+
 if (sitterFilters) {
   updateSitterFilters();
 } else {
-renderSitterDirectory();
+  renderSitterDirectory();
 }
 renderQuestions(questions);
 renderChatMessages(chatMessagesData, { forceScroll: true });
