@@ -368,6 +368,17 @@ a:focus {
   border: 2px solid var(--green);
 }
 
+.btn-danger {
+  background: var(--error);
+  border: 2px solid var(--error);
+  color: var(--white);
+}
+
+.btn-danger:hover,
+.btn-danger:focus {
+  box-shadow: 0 10px 20px rgba(196, 54, 43, 0.2);
+}
+
 .section {
   padding: 4.5rem 0;
 }
@@ -908,6 +919,28 @@ a:focus {
 
 .filter-actions .btn {
   width: fit-content;
+}
+
+.admin-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.admin-status {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.admin-status[data-state='success'] {
+  color: var(--green-dark);
+}
+
+.admin-status[data-state='warning'],
+.admin-status[data-state='error'] {
+  color: var(--error);
 }
 
 label {
