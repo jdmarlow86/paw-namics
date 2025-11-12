@@ -94,14 +94,7 @@ const cardModalSubmit = cardModalForm?.querySelector('[data-card-submit]');
 const cardSubmitDefaultText = cardModalSubmit?.textContent?.trim() || 'Purchase';
 let activePaymentButton = null;
 const navigationToggles = document.querySelectorAll('[data-nav-toggle]');
-const themeToggle = document.querySelector('[data-theme-toggle]');
-const themeToggleIcon = themeToggle?.querySelector('[data-theme-toggle-icon]');
-const themeToggleLabel = themeToggle?.querySelector('[data-theme-toggle-label]');
 const headerAuthButton = document.querySelector('[data-auth-button]');
-const prefersDarkScheme =
-  typeof window !== 'undefined' && typeof window.matchMedia === 'function'
-    ? window.matchMedia('(prefers-color-scheme: dark)')
-    : null;
 const sitterPhotoInput = sitterForm?.querySelector('input[name="photo"]');
 const sitterPhotoPreview = sitterForm?.querySelector('[data-photo-preview]');
 const sitterPhotoPreviewImage = sitterForm?.querySelector('[data-photo-preview-image]');
@@ -398,7 +391,6 @@ const STORAGE_KEYS = {
   PROFILE: 'pawnamics_user_profile',
   SETTINGS: 'pawnamics_user_settings',
   SUBSCRIPTIONS: 'pawnamics_sitter_subscriptions',
-  THEME: 'pawnamics_theme',
   ACTIVE_SITTER: 'pawnamics_active_sitter',
 };
 
@@ -533,65 +525,7 @@ function setNewsletterStatusMessage(message, statusType = 'success') {
 }
 
 function initializeTheme() {
-  const getStoredTheme = () => {
-    const storedTheme = loadStoredData(STORAGE_KEYS.THEME, null);
-    return storedTheme === 'light' || storedTheme === 'dark' ? storedTheme : null;
-  };
-
-  const updateToggle = (theme) => {
-    if (!themeToggle) {
-      return;
-    }
-    const isDark = theme === 'dark';
-    themeToggle.setAttribute('aria-pressed', isDark ? 'true' : 'false');
-    themeToggle.setAttribute(
-      'aria-label',
-      isDark ? 'Switch to light mode' : 'Switch to dark mode'
-    );
-    if (themeToggleIcon) {
-      themeToggleIcon.textContent = isDark ? '🌞' : '🌙';
-    }
-    if (themeToggleLabel) {
-      themeToggleLabel.textContent = isDark ? 'Light mode' : 'Dark mode';
-    }
-  };
-
-  let activeTheme =
-    getStoredTheme() || (prefersDarkScheme && prefersDarkScheme.matches ? 'dark' : 'light');
-
-  const applyTheme = (theme, { persist } = { persist: false }) => {
-    const normalizedTheme = theme === 'dark' ? 'dark' : 'light';
-    document.documentElement.dataset.theme = normalizedTheme;
-    updateToggle(normalizedTheme);
-    activeTheme = normalizedTheme;
-    if (persist) {
-      saveStoredData(STORAGE_KEYS.THEME, normalizedTheme);
-    }
-  };
-
-  applyTheme(activeTheme);
-
-  if (themeToggle) {
-    themeToggle.addEventListener('click', () => {
-      const nextTheme = activeTheme === 'dark' ? 'light' : 'dark';
-      applyTheme(nextTheme, { persist: true });
-    });
-  }
-
-  if (prefersDarkScheme) {
-    const handleSystemThemeChange = (event) => {
-      if (getStoredTheme()) {
-        return;
-      }
-      applyTheme(event.matches ? 'dark' : 'light');
-    };
-
-    if (typeof prefersDarkScheme.addEventListener === 'function') {
-      prefersDarkScheme.addEventListener('change', handleSystemThemeChange);
-    } else if (typeof prefersDarkScheme.addListener === 'function') {
-      prefersDarkScheme.addListener(handleSystemThemeChange);
-    }
-  }
+  document.documentElement.dataset.theme = 'dark';
 }
 
 function sanitizeDigits(value) {
