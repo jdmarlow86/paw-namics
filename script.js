@@ -97,6 +97,7 @@ const navigationToggles = document.querySelectorAll('[data-nav-toggle]');
 const themeToggle = document.querySelector('[data-theme-toggle]');
 const themeToggleIcon = themeToggle?.querySelector('[data-theme-toggle-icon]');
 const themeToggleLabel = themeToggle?.querySelector('[data-theme-toggle-label]');
+const headerAuthButton = document.querySelector('[data-auth-button]');
 const prefersDarkScheme =
   typeof window !== 'undefined' && typeof window.matchMedia === 'function'
     ? window.matchMedia('(prefers-color-scheme: dark)')
@@ -284,8 +285,58 @@ function closeSettingsModal(options = {}) {
   }
 }
 
+function updateHeaderAuthButton() {
+  if (!headerAuthButton) {
+    return;
+  }
+
+  const isLoggedIn = Boolean(activeSitterAccount?.id);
+  headerAuthButton.textContent = isLoggedIn ? 'Log Out' : 'Log In';
+  headerAuthButton.dataset.state = isLoggedIn ? 'logout' : 'login';
+  headerAuthButton.classList.toggle('btn-outline', !isLoggedIn);
+  headerAuthButton.classList.toggle('btn-danger', Boolean(isLoggedIn));
+  headerAuthButton.setAttribute(
+    'aria-label',
+    isLoggedIn ? 'Log out of your sitter account' : 'Log in to your sitter account'
+  );
+}
+
+function logoutActiveSitter(options = {}) {
+  if (!activeSitterAccount) {
+    updateHeaderAuthButton();
+    return;
+  }
+
+  activeSitterAccount = null;
+  saveStoredData(STORAGE_KEYS.ACTIVE_SITTER, activeSitterAccount);
+
+  activeSitterProfileId = null;
+  activeSitterProfileName = '';
+
+  if (typeof window !== 'undefined') {
+    try {
+      const url = new URL(window.location.href);
+      if (url.searchParams.has('id')) {
+        url.searchParams.delete('id');
+        const newUrl = `${url.pathname}${url.search}${url.hash}`;
+        window.history.replaceState({}, '', newUrl);
+      }
+    } catch (error) {
+      console.warn('Unable to update the URL after logging out', error);
+    }
+  }
+
+  renderSitterProfilePage();
+  updateHeaderAuthButton();
+
+  if (!options.silent && typeof window !== 'undefined') {
+    window.alert('You have been logged out of your sitter account.');
+  }
+}
+
 function handleProfileLogout() {
   setProfileMenuOpen(false);
+  logoutActiveSitter({ silent: true });
   userProfile = null;
 
   try {
@@ -1557,6 +1608,7 @@ function removeSitterById(sitterId, sitterName = '') {
   if (activeSitterAccount?.id === sitterId) {
     activeSitterAccount = null;
     saveStoredData(STORAGE_KEYS.ACTIVE_SITTER, activeSitterAccount);
+    updateHeaderAuthButton();
   }
 
   if (activeSitterProfileId === sitterId) {
@@ -1885,6 +1937,18 @@ renderSitterProfilePage();
 if (sitterPhotoPreview) {
   resetSitterPhotoPreview();
 }
+
+updateHeaderAuthButton();
+
+headerAuthButton?.addEventListener('click', () => {
+  const action = headerAuthButton.dataset.state;
+  if (action === 'logout') {
+    logoutActiveSitter();
+  } else {
+    const loginUrl = new URL('index.html#sitter-login', window.location.href);
+    window.location.href = loginUrl.toString();
+  }
+});
 
 if (profileForm) {
   const backgroundCheckComplete =
@@ -2452,6 +2516,7 @@ sitterForm?.addEventListener('submit', async (event) => {
     name: sitterRecord.name || sitterRecord.username,
   };
   saveStoredData(STORAGE_KEYS.ACTIVE_SITTER, activeSitterAccount);
+  updateHeaderAuthButton();
   renderSitterDirectory();
   sitterForm.reset();
   resetSitterPhotoPreview();
@@ -2520,6 +2585,7 @@ loginForms.forEach((form) => {
       name: sitter.name || sitter.username || username,
     };
     saveStoredData(STORAGE_KEYS.ACTIVE_SITTER, activeSitterAccount);
+    updateHeaderAuthButton();
 
     setFormMessage(messageElement, 'Logging you in…', 'info');
 
