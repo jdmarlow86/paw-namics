@@ -1798,8 +1798,7 @@ function renderSitterProfilePage() {
   }
 
   if (sitterProfileHero) {
-    const heroPhoto =
-      sitter.photo && sitter.photo.length ? sitter.photo : DEFAULT_SITTER_HERO;
+    const heroPhoto = DEFAULT_SITTER_HERO;
     sitterProfileHero.style.setProperty(
       '--sitter-hero-image',
       `url("${heroPhoto}")`
