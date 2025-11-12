@@ -270,10 +270,23 @@ a:focus {
 
 .main-nav {
   display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
   gap: 1.25rem;
   font-weight: 500;
   order: 2;
   margin-left: auto;
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: none;
+}
+
+.main-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.main-nav a {
+  white-space: nowrap;
 }
 
 .theme-toggle {
@@ -1880,15 +1893,11 @@ body.modal-open {
 
   .main-nav {
     width: 100%;
-    display: grid;
-    gap: 0.75rem;
-    padding-top: 0.75rem;
+    padding-top: 0.5rem;
     margin-top: 0.25rem;
     border-top: 1px solid var(--header-border);
-  }
-
-  .main-nav a {
-    padding: 0.35rem 0;
+    gap: 0.85rem;
+    padding-bottom: 0.5rem;
   }
 
   .main-nav[data-nav-initialized='true'] {
@@ -1901,7 +1910,7 @@ body.modal-open {
   }
 
   .main-nav[data-nav-initialized='true'].is-open {
-    max-height: 480px;
+    max-height: 4.5rem;
     opacity: 1;
     pointer-events: auto;
     transform: translateY(0);
