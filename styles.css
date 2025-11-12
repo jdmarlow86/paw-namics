@@ -1071,6 +1071,11 @@ select:focus {
   font-weight: 600;
 }
 
+.badge-soft {
+  background: rgba(20, 140, 59, 0.1);
+  color: var(--green-dark);
+}
+
 .sitter-card .rates {
   display: flex;
   gap: 1rem;
@@ -1108,12 +1113,9 @@ select:focus {
 }
 
 .sitter-profile-hero {
-  --sitter-hero-image: url('https://images.unsplash.com/photo-1525253086316-d0c936c814f8?auto=format&fit=crop&w=1200&q=80');
   padding: 5rem 0 4rem;
-  background-image: linear-gradient(140deg, rgba(255, 255, 255, 0.92), rgba(213, 245, 227, 0.88)),
-    var(--sitter-hero-image);
-  background-size: cover;
-  background-position: center;
+  background: var(--surface);
+  border-bottom: 1px solid rgba(20, 140, 59, 0.1);
 }
 
 .sitter-hero-content {
@@ -1163,6 +1165,23 @@ select:focus {
   box-shadow: 0 20px 45px rgba(20, 140, 59, 0.2);
 }
 
+.hero-highlights {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+  display: grid;
+  gap: 0.5rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.hero-highlights li::before {
+  content: '•';
+  color: var(--green-dark);
+  font-weight: 700;
+  margin-right: 0.5rem;
+}
+
 .sitter-profile-grid {
   display: grid;
   gap: 2rem;
@@ -1189,6 +1208,41 @@ select:focus {
   margin: 0;
   color: var(--muted);
   font-weight: 600;
+}
+
+.profile-specialties,
+.profile-credentials,
+.profile-environment {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.profile-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.65rem;
+  color: var(--muted);
+}
+
+.profile-list li {
+  padding-left: 1.25rem;
+  position: relative;
+}
+
+.profile-list li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: var(--green-dark);
+  font-weight: 700;
+}
+
+.profile-environment p {
+  margin: 0;
+  color: var(--muted);
 }
 
 .subscription-card {
@@ -1251,6 +1305,90 @@ select:focus {
 .plan-option:focus-within {
   border-color: var(--green);
   background: rgba(29, 185, 84, 0.08);
+}
+
+.section--muted {
+  background: var(--surface-alt);
+}
+
+.sitter-profile-extras {
+  padding-top: 0;
+}
+
+.sitter-extras-grid {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.profile-timeline {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 1.5rem;
+}
+
+.profile-timeline li h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+}
+
+.profile-timeline li p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.testimonial {
+  background: var(--surface-alt);
+  padding: 1.25rem;
+  border-radius: 1.2rem;
+  display: grid;
+  gap: 0.75rem;
+  border: 1px solid rgba(20, 140, 59, 0.12);
+}
+
+.testimonial + .testimonial {
+  margin-top: 1.25rem;
+}
+
+.testimonial blockquote {
+  margin: 0;
+  font-style: italic;
+  color: var(--text);
+}
+
+.testimonial cite {
+  font-style: normal;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.profile-facts {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.25rem;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.profile-facts li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  color: var(--muted);
+}
+
+.profile-facts strong {
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.profile-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
 }
 
 .plan-price {
