@@ -2163,7 +2163,9 @@ function renderProfile(profile) {
   updateBackgroundCheckUI(profile.backgroundCheck || null);
 
   if (profileHighlightSection) {
-    if (backgroundCheckComplete) {
+    const shouldShowHighlight = backgroundCheckComplete || Boolean(activeSitterAccount?.id);
+
+    if (shouldShowHighlight) {
       profileHighlightSection.classList.remove('hidden');
 
       if (profileHighlightAvatar) {
@@ -2216,15 +2218,20 @@ function renderProfile(profile) {
       }
 
       if (profileHighlightBackground) {
-        const completedAt = profile.backgroundCheck?.completedAt;
-        const completedOn = formatBackgroundCheckDate(completedAt);
-        const summary = profile.backgroundCheck?.summary || '';
-        const baseMessage = completedOn
-          ? `Background check completed on ${completedOn}.`
-          : 'Background check completed.';
-        const message = summary ? `${baseMessage} ${summary}` : baseMessage;
-        profileHighlightBackground.textContent = message;
-        profileHighlightBackground.classList.remove('hidden');
+        if (backgroundCheckComplete) {
+          const completedAt = profile.backgroundCheck?.completedAt;
+          const completedOn = formatBackgroundCheckDate(completedAt);
+          const summary = profile.backgroundCheck?.summary || '';
+          const baseMessage = completedOn
+            ? `Background check completed on ${completedOn}.`
+            : 'Background check completed.';
+          const message = summary ? `${baseMessage} ${summary}` : baseMessage;
+          profileHighlightBackground.textContent = message;
+          profileHighlightBackground.classList.remove('hidden');
+        } else {
+          profileHighlightBackground.textContent = '';
+          profileHighlightBackground.classList.add('hidden');
+        }
       }
     } else {
       profileHighlightSection.classList.add('hidden');
