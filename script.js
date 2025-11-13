@@ -44,6 +44,8 @@ const profileHighlightPets = document.querySelector('[data-profile-highlight-pet
 const profileHighlightExperience = document.querySelector('[data-profile-highlight-experience]');
 const profileHighlightBio = document.querySelector('[data-profile-highlight-bio]');
 const profileHighlightBackground = document.querySelector('[data-profile-highlight-background]');
+const sitterOnboardingSection = document.querySelector('[data-sitter-onboarding]');
+const profileFormCard = document.querySelector('[data-profile-form-card]');
 const backgroundCheckButton = document.querySelector('[data-background-check-button]');
 const backgroundCheckStatus = document.querySelector('[data-background-check-status]');
 const backgroundCheckIcon = document.querySelector('[data-background-check-icon]');
@@ -301,6 +303,20 @@ function updateHeaderAuthButton() {
   headerSitterLinks.forEach((link) => {
     link.classList.toggle('hidden', isLoggedIn);
   });
+}
+
+function updateProfilePageState(currentProfile) {
+  const hasSavedProfile = Boolean(currentProfile);
+  const isLoggedIn = Boolean(activeSitterAccount?.id);
+  const hideNewProfileSections = hasSavedProfile || isLoggedIn;
+
+  if (sitterOnboardingSection) {
+    sitterOnboardingSection.classList.toggle('hidden', hideNewProfileSections);
+  }
+
+  if (profileFormCard) {
+    profileFormCard.classList.toggle('hidden', hideNewProfileSections);
+  }
 }
 
 function buildProfileFromSitter(sitter) {
@@ -1940,7 +1956,7 @@ headerAuthButton?.addEventListener('click', () => {
     logoutActiveSitter();
     clearStoredProfileData();
   } else {
-    const loginUrl = new URL('index.html#sitter-login', window.location.href);
+    const loginUrl = new URL('profile.html#sitter-login', window.location.href);
     window.location.href = loginUrl.toString();
   }
 });
@@ -2149,6 +2165,7 @@ function updateBackgroundCheckUI(result, options = {}) {
 }
 
 function renderProfile(profile) {
+  updateProfilePageState(profile);
   updateProfileMenu(profile);
 
   const hasProfilePreview = Boolean(profileDetails && profileEmptyState);
