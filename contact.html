@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contact PawNamics</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-content">
+        <a class="logo" href="index.html">PawNamics</a>
+        <div class="header-controls">
+          <button
+            class="btn btn-outline header-auth-button"
+            type="button"
+            data-auth-button
+          >
+            Log In
+          </button>
+          <a
+            class="header-signup-link"
+            href="become-a-sitter.html"
+            data-signup-link
+          >
+            or Signup
+          </a>
+          <button
+            class="nav-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="primary-navigation"
+            data-nav-toggle
+          >
+            <span class="sr-only">Toggle navigation</span>
+            <span class="nav-toggle-icon" aria-hidden="true"></span>
+          </button>
+          <div class="profile-menu hidden" data-profile-menu>
+            <button
+              class="profile-menu-trigger"
+              type="button"
+              aria-haspopup="true"
+              aria-expanded="false"
+              data-profile-menu-trigger
+            >
+              <span class="sr-only">Open account menu</span>
+              <img
+                src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=200&q=80"
+                alt="Your profile avatar"
+                data-profile-menu-avatar
+              />
+            </button>
+            <div class="profile-menu-dropdown" role="menu" data-profile-menu-dropdown>
+              <a class="profile-menu-item" href="profile.html" role="menuitem" data-profile-menu-edit
+                >Edit profile</a
+              >
+              <button class="profile-menu-item" type="button" role="menuitem" data-profile-menu-settings>
+                Settings
+              </button>
+              <button class="profile-menu-item" type="button" role="menuitem" data-profile-menu-logout>
+                Log out
+              </button>
+            </div>
+          </div>
+        </div>
+        <nav class="main-nav" id="primary-navigation" data-nav>
+          <a href="index.html">Home</a>
+          <a href="about.html">About</a>
+          <a href="become-a-sitter.html">Become a Sitter</a>
+          <a href="video-chat.html">Video Chat</a>
+          <a href="affiliate.html">Affiliates</a>
+          <a href="profile.html">Profile</a>
+          <a href="contact.html" aria-current="page">Contact</a>
+          <a href="support.html">Support</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="container hero-content">
+          <div>
+            <h1>We would love to hear from you.</h1>
+            <p>
+              Whether you have a quick question, partnership idea, or need help
+              choosing the perfect sitter, the PawNamics team is ready to help.
+              Reach us directly at
+              <a href="mailto:pawnamics.contact@gmail.com">pawnamics.contact@gmail.com</a>
+              or send a message using the form below.
+            </p>
+          </div>
+          <img
+            src="https://images.unsplash.com/photo-1525253086316-d0c936c814f8?auto=format&fit=crop&w=700&q=80"
+            alt="Person petting a happy dog"
+          />
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container grid two-col">
+          <div class="card">
+            <h2>Contact PawNamics</h2>
+            <p>
+              Share your name, email, and message—we reply within one business
+              day.
+            </p>
+            <form
+              action="https://formspree.io/f/pawnamics.contact@gmail.com"
+              method="POST"
+              class="stacked-form"
+            >
+              <label for="contact-name">Name</label>
+              <input
+                type="text"
+                id="contact-name"
+                name="name"
+                placeholder="Your name"
+                required
+              />
+              <label for="contact-email">Email</label>
+              <input
+                type="email"
+                id="contact-email"
+                name="email"
+                placeholder="you@example.com"
+                required
+              />
+              <label for="contact-message">How can we help?</label>
+              <textarea
+                id="contact-message"
+                name="message"
+                rows="6"
+                placeholder="Share your questions or details here"
+                required
+              ></textarea>
+              <button type="submit" class="btn">Send Message</button>
+            </form>
+          </div>
+          <div class="card highlight">
+            <h3>Other ways to connect</h3>
+            <ul class="feature-list">
+              <li>Email: <a href="mailto:pawnamics.contact@gmail.com">pawnamics.contact@gmail.com</a></li>
+              <li>Instagram: <a href="https://instagram.com/pawnamics">@pawnamics</a></li>
+              <li>Facebook: <a href="https://facebook.com/pawnamics">facebook.com/pawnamics</a></li>
+            </ul>
+            <p>
+              Prefer a quick chat? Let us know in your message and we will follow
+              up with a video call invitation.
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-content">
+        <div>
+          <p class="footer-logo">PawNamics</p>
+          <p class="footer-tagline">Trusted pet care, tailored to every companion.</p>
+        </div>
+        <div class="footer-links">
+          <a href="index.html">Home</a>
+          <a href="about.html">About</a>
+          <a href="become-a-sitter.html">Become a Sitter</a>
+          <a href="affiliate.html">Affiliates</a>
+          <a href="video-chat.html">Video Chat</a>
+          <a href="contact.html">Contact</a>
+          <a href="support.html">Support</a>
+        </div>
+      </div>
+      <p class="footer-note">© PawNamics. Built for pet lovers everywhere.</p>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>

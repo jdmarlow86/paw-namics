@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Support PawNamics</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-content">
+        <a class="logo" href="index.html">PawNamics</a>
+        <div class="header-controls">
+          <button
+            class="btn btn-outline header-auth-button"
+            type="button"
+            data-auth-button
+          >
+            Log In
+          </button>
+          <a
+            class="header-signup-link"
+            href="become-a-sitter.html"
+            data-signup-link
+          >
+            or Signup
+          </a>
+          <button
+            class="nav-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="primary-navigation"
+            data-nav-toggle
+          >
+            <span class="sr-only">Toggle navigation</span>
+            <span class="nav-toggle-icon" aria-hidden="true"></span>
+          </button>
+          <div class="profile-menu hidden" data-profile-menu>
+            <button
+              class="profile-menu-trigger"
+              type="button"
+              aria-haspopup="true"
+              aria-expanded="false"
+              data-profile-menu-trigger
+            >
+              <span class="sr-only">Open account menu</span>
+              <img
+                src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=200&q=80"
+                alt="Your profile avatar"
+                data-profile-menu-avatar
+              />
+            </button>
+            <div class="profile-menu-dropdown" role="menu" data-profile-menu-dropdown>
+              <a class="profile-menu-item" href="profile.html" role="menuitem" data-profile-menu-edit
+                >Edit profile</a
+              >
+              <button class="profile-menu-item" type="button" role="menuitem" data-profile-menu-settings>
+                Settings
+              </button>
+              <button class="profile-menu-item" type="button" role="menuitem" data-profile-menu-logout>
+                Log out
+              </button>
+            </div>
+          </div>
+        </div>
+        <nav class="main-nav" id="primary-navigation" data-nav>
+          <a href="index.html">Home</a>
+          <a href="about.html">About</a>
+          <a href="become-a-sitter.html">Become a Sitter</a>
+          <a href="video-chat.html">Video Chat</a>
+          <a href="affiliate.html">Affiliates</a>
+          <a href="profile.html">Profile</a>
+          <a href="contact.html">Contact</a>
+          <a href="support.html" aria-current="page">Support</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="container hero-content">
+          <div>
+            <h1>Thank you for believing in PawNamics.</h1>
+            <p>
+              Every contribution fuels new features, stronger safety tools, and
+              more opportunities for pet lovers everywhere. We are deeply
+              grateful for your encouragement and generosity.
+            </p>
+          </div>
+          <img
+            src="https://images.unsplash.com/photo-1558944351-c3228e50f83e?auto=format&fit=crop&w=700&q=80"
+            alt="Pet parent hugging their dog"
+          />
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container grid two-col">
+          <div class="card">
+            <h2>Ways to Support</h2>
+            <p>
+              Choose the option that works best for you—every dollar keeps tails
+              wagging and connects more families with trusted care.
+            </p>
+            <ul class="feature-list">
+              <li><strong>CashApp:</strong> $jdmarlow</li>
+              <li><strong>Venmo:</strong> Jonathan-Marlow-19</li>
+              <li><strong>PayPal:</strong> @jdmarlow86</li>
+              <li><strong>ACH or debit card:</strong> Contact us to receive secure transfer details.</li>
+            </ul>
+          </div>
+          <div class="card highlight">
+            <h3>Your impact</h3>
+            <p>
+              Support from our community allows us to expand sitter verification,
+              launch new education resources, and provide rapid assistance when
+              pet parents need it most.
+            </p>
+            <p>
+              We are honored to build PawNamics alongside you. Thank you for
+              helping us deliver compassionate care to every furry family member.
+            </p>
+            <a class="btn" href="contact.html">Let us know how we can support you</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-content">
+        <div>
+          <p class="footer-logo">PawNamics</p>
+          <p class="footer-tagline">Trusted pet care, tailored to every companion.</p>
+        </div>
+        <div class="footer-links">
+          <a href="index.html">Home</a>
+          <a href="about.html">About</a>
+          <a href="become-a-sitter.html">Become a Sitter</a>
+          <a href="affiliate.html">Affiliates</a>
+          <a href="video-chat.html">Video Chat</a>
+          <a href="contact.html">Contact</a>
+          <a href="support.html">Support</a>
+        </div>
+      </div>
+      <p class="footer-note">© PawNamics. Built for pet lovers everywhere.</p>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
