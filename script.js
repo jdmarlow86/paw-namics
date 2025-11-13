@@ -9,8 +9,6 @@ const chatWindow = document.querySelector('[data-chat-window]');
 const chatStatusMessage = document.querySelector('[data-chat-status]');
 const chatNameInput = chatForm ? chatForm.querySelector('input[name="chatName"]') : null;
 const chatMessageInput = chatForm ? chatForm.querySelector('textarea[name="chatMessage"]') : null;
-const videoForm = document.getElementById('video-form');
-const videoFrame = document.getElementById('video-frame');
 const profileForm = document.getElementById('profile-form');
 const profileDetails = document.querySelector('[data-profile-details]');
 const profileEmptyState = document.querySelector('[data-profile-empty]');
@@ -66,7 +64,6 @@ const sitterServicesElement = document.querySelector('[data-sitter-services]');
 const sitterBioElement = document.querySelector('[data-sitter-bio]');
 const sitterPhotoElement = document.querySelector('[data-sitter-photo]');
 const sitterRatesElement = document.querySelector('[data-sitter-rates]');
-const sitterVideoButton = document.querySelector('[data-sitter-video]');
 const subscriptionForm = document.querySelector('[data-subscription-form]');
 const subscriptionTotal = document.querySelector('[data-subscription-total]');
 const subscriptionMessage = document.querySelector('[data-subscription-message]');
@@ -1550,7 +1547,6 @@ function createSitterCard(sitter) {
     <p class="details"><strong>Services:</strong> ${sitter.services}</p>
     <div class="card-actions">
       <a class="btn" data-view-profile href="${profileUrl.toString()}">View Profile</a>
-      <button class="btn btn-outline" type="button">Start Video Chat</button>
     </div>
   `;
 
@@ -1568,20 +1564,6 @@ function createSitterCard(sitter) {
       actions.appendChild(deleteButton);
     }
   }
-
-  const videoButton = card.querySelector('button');
-  videoButton.addEventListener('click', () => {
-    const roomName = `PawNamics-${sitter.name.replace(/\s+/g, '')}`;
-    const videoSection = document.getElementById('video-chat');
-    if (videoFrame && videoSection) {
-      startVideoChat(roomName);
-      videoSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    } else {
-      const url = new URL('video-chat.html', window.location.href);
-      url.searchParams.set('room', roomName);
-      window.location.href = url.toString();
-    }
-  });
 
   return card;
 }
@@ -1737,12 +1719,6 @@ function renderQuestions(questions) {
   questions.forEach((question) => questionsList.appendChild(createQuestionItem(question)));
 }
 
-function startVideoChat(roomName) {
-  if (!videoFrame) return;
-  const sanitized = roomName.replace(/[^A-Za-z0-9-]/g, '') || 'PawNamicsWelcome';
-  videoFrame.src = `https://meet.jit.si/embed/${sanitized}`;
-}
-
 function setElementTextContent(elements, value, fallback = '') {
   const text = value && value.length ? value : fallback;
   elements.forEach((element) => {
@@ -1871,15 +1847,6 @@ function renderSitterProfilePage() {
       '--sitter-hero-image',
       `url("${heroPhoto}")`
     );
-  }
-
-  if (sitterVideoButton) {
-    const roomName = `PawNamics-${sitterName.replace(/\s+/g, '')}`;
-    sitterVideoButton.addEventListener('click', () => {
-      const url = new URL('video-chat.html', window.location.href);
-      url.searchParams.set('room', roomName);
-      window.location.href = url.toString();
-    }, { once: true });
   }
 
   if (typeof document !== 'undefined' && sitterName.length) {
@@ -2721,13 +2688,6 @@ window.addEventListener('storage', (event) => {
   renderChatMessages(chatMessagesData);
 });
 
-videoForm?.addEventListener('submit', (event) => {
-  event.preventDefault();
-  const formData = new FormData(videoForm);
-  const room = formData.get('room');
-  startVideoChat(room);
-});
-
 profileForm?.addEventListener('submit', (event) => {
   event.preventDefault();
   const formData = new FormData(profileForm);
@@ -2894,15 +2854,3 @@ settingsForm?.addEventListener('submit', (event) => {
 });
 
 applySettingsToForm();
-
-if (videoFrame) {
-  const params = new URLSearchParams(window.location.search);
-  const requestedRoom = params.get('room');
-  if (requestedRoom) {
-    startVideoChat(requestedRoom);
-    const roomInput = videoForm?.querySelector('input[name="room"]');
-    if (roomInput) {
-      roomInput.value = requestedRoom;
-    }
-  }
-}
