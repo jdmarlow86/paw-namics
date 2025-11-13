@@ -93,6 +93,9 @@ let activePaymentButton = null;
 const navigationToggles = document.querySelectorAll('[data-nav-toggle]');
 const headerAuthButton = document.querySelector('[data-auth-button]');
 const headerSignupLink = document.querySelector('[data-signup-link]');
+const headerSitterLinks = Array.from(
+  document.querySelectorAll('[data-header-sitter-link]')
+);
 const sitterPhotoInput = sitterForm?.querySelector('input[name="photo"]');
 const sitterPhotoPreview = sitterForm?.querySelector('[data-photo-preview]');
 const sitterPhotoPreviewImage = sitterForm?.querySelector('[data-photo-preview-image]');
@@ -294,6 +297,10 @@ function updateHeaderAuthButton() {
   if (headerSignupLink) {
     headerSignupLink.classList.toggle('hidden', isLoggedIn);
   }
+
+  headerSitterLinks.forEach((link) => {
+    link.classList.toggle('hidden', isLoggedIn);
+  });
 }
 
 function buildProfileFromSitter(sitter) {
