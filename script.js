@@ -1958,7 +1958,7 @@ headerAuthButton?.addEventListener('click', () => {
     logoutActiveSitter();
     clearStoredProfileData();
   } else {
-    const loginUrl = new URL('profile.html#sitter-login', window.location.href);
+    const loginUrl = new URL('index.html#sitter-login', window.location.href);
     window.location.href = loginUrl.toString();
   }
 });
