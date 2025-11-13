@@ -84,6 +84,7 @@ a:focus {
   background: var(--header-bg);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--header-border);
+  text-align: left;
 }
 
 .header-content {
@@ -217,6 +218,11 @@ a:focus {
   font-weight: 700;
   color: var(--green-dark);
   margin-right: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+  flex-shrink: 0;
 }
 
 .nav-toggle {
@@ -401,6 +407,67 @@ a:focus {
 .btn:focus {
   transform: translateY(-2px);
   box-shadow: 0 10px 20px rgba(29, 185, 84, 0.25);
+}
+
+.section-illustration {
+  display: block;
+  width: 100%;
+  max-height: 320px;
+  object-fit: cover;
+  border-radius: 1.75rem;
+  box-shadow: 0 20px 40px rgba(17, 87, 36, 0.14);
+  margin: 2rem 0;
+}
+
+.card-illustration {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+}
+
+.payment-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+}
+
+.payment-button {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  padding: 0.9rem 1.5rem;
+  border-radius: 1rem;
+  font-weight: 600;
+  color: var(--white);
+  box-shadow: 0 12px 24px rgba(17, 87, 36, 0.16);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.payment-button span {
+  font-size: 0.82rem;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.payment-button:hover,
+.payment-button:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 34px rgba(17, 87, 36, 0.2);
+  filter: brightness(1.05);
+  text-decoration: none;
+}
+
+.payment-button.cashapp {
+  background: linear-gradient(135deg, #00c244, #009b34);
+}
+
+.payment-button.venmo {
+  background: linear-gradient(135deg, #009fe3, #007ec1);
+}
+
+.payment-button.paypal {
+  background: linear-gradient(135deg, #003087, #009cde);
 }
 
 .btn-outline {
