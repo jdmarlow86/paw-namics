@@ -95,6 +95,7 @@ const cardSubmitDefaultText = cardModalSubmit?.textContent?.trim() || 'Purchase'
 let activePaymentButton = null;
 const navigationToggles = document.querySelectorAll('[data-nav-toggle]');
 const headerAuthButton = document.querySelector('[data-auth-button]');
+const headerSignupLink = document.querySelector('[data-signup-link]');
 const sitterPhotoInput = sitterForm?.querySelector('input[name="photo"]');
 const sitterPhotoPreview = sitterForm?.querySelector('[data-photo-preview]');
 const sitterPhotoPreviewImage = sitterForm?.querySelector('[data-photo-preview-image]');
@@ -292,6 +293,10 @@ function updateHeaderAuthButton() {
     'aria-label',
     isLoggedIn ? 'Log out of your sitter account' : 'Log in to your sitter account'
   );
+
+  if (headerSignupLink) {
+    headerSignupLink.classList.toggle('hidden', isLoggedIn);
+  }
 }
 
 function buildProfileFromSitter(sitter) {
