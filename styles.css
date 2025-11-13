@@ -1859,17 +1859,6 @@ body.modal-open {
   display: none !important;
 }
 
-.video-card {
-  padding: 0;
-  overflow: hidden;
-}
-
-.video-card iframe {
-  width: 100%;
-  min-height: 360px;
-  border: none;
-}
-
 .site-footer {
   background: var(--green-dark);
   color: var(--white);
@@ -2025,7 +2014,4 @@ body.modal-open {
     display: none;
   }
 
-  .video-card iframe {
-    min-height: 240px;
-  }
 }

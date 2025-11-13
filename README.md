@@ -2,8 +2,8 @@
 
 PawNamics is a clean, green-and-white themed web experience that connects pet
 parents with trusted sitters. The site includes sitter profile creation, a public
-sitter directory, dedicated contact and support hubs, built-in video chat via
-Jitsi Meet, and a dedicated affiliate hub for partner offers.
+sitter directory, dedicated contact and support hubs, and a dedicated affiliate
+hub for partner offers.
 
 ## Getting started
 
@@ -17,8 +17,6 @@ refresh without losing content.
   and more. Saved profiles instantly appear in the directory.
 - **Contact hub:** Reach the PawNamics team with questions or partnership ideas.
 - **Support page:** Share contributions that keep the platform growing.
-- **Video chat:** Launch a Jitsi Meet room directly from PawNamics—either from
-  a sitter card or by creating a custom meeting name.
 - **Affiliate hub:** Discover curated partner offers and submit new affiliate
   applications.
 
