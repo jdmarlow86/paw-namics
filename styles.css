@@ -216,6 +216,7 @@ a:focus {
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--green-dark);
+  margin-right: auto;
 }
 
 .nav-toggle {
