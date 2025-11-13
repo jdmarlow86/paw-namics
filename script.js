@@ -45,6 +45,7 @@ const profileHighlightExperience = document.querySelector('[data-profile-highlig
 const profileHighlightBio = document.querySelector('[data-profile-highlight-bio]');
 const profileHighlightBackground = document.querySelector('[data-profile-highlight-background]');
 const sitterOnboardingSection = document.querySelector('[data-sitter-onboarding]');
+const profileBuilderSection = document.getElementById('profile-builder');
 const profileFormCard = document.querySelector('[data-profile-form-card]');
 const backgroundCheckButton = document.querySelector('[data-background-check-button]');
 const backgroundCheckStatus = document.querySelector('[data-background-check-status]');
@@ -52,6 +53,7 @@ const backgroundCheckIcon = document.querySelector('[data-background-check-icon]
 const backgroundCheckText = document.querySelector('[data-background-check-text]');
 const backgroundCheckMessage = document.querySelector('[data-background-check-message]');
 const backgroundCheckDetails = document.querySelector('[data-background-check-details]');
+const profileEditButtons = Array.from(document.querySelectorAll('[data-profile-edit]'));
 const profileDeleteButtons = Array.from(document.querySelectorAll('[data-profile-delete]'));
 const sitterProfileHero = document.querySelector('[data-sitter-hero]');
 const sitterProfileSection = document.querySelector('[data-sitter-profile]');
@@ -2736,6 +2738,27 @@ profileForm?.addEventListener('submit', (event) => {
       profileMessage.classList.add('hidden');
     }, 4000);
   }
+});
+
+profileEditButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    const scrollTarget = profileBuilderSection || profileFormCard || profileForm;
+    if (scrollTarget && typeof scrollTarget.scrollIntoView === 'function') {
+      scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    if (profileForm) {
+      const focusTarget =
+        profileForm.querySelector('input[name="name"]') ||
+        profileForm.querySelector('input, textarea, select');
+
+      if (focusTarget instanceof HTMLElement) {
+        window.setTimeout(() => {
+          focusTarget.focus();
+        }, 300);
+      }
+    }
+  });
 });
 
 profileDeleteButtons.forEach((button) => {
