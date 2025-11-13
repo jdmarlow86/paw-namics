@@ -294,6 +294,96 @@ function updateHeaderAuthButton() {
   );
 }
 
+function buildProfileFromSitter(sitter) {
+  if (!sitter) {
+    return null;
+  }
+
+  const servicesText = typeof sitter.services === 'string' ? sitter.services.trim() : '';
+  const availabilityText =
+    typeof sitter.availability === 'string' ? sitter.availability.trim() : '';
+
+  const profile = {
+    sitterId: sitter.id,
+    name: sitter.name || sitter.username || '',
+    location: sitter.location || '',
+    headline: '',
+    petFocus: '',
+    bio: sitter.bio || '',
+    experience: sitter.experience || '',
+    photo: sitter.photo || '',
+  };
+
+  if (servicesText && availabilityText) {
+    profile.headline = `${servicesText} • ${availabilityText}`;
+  } else if (servicesText) {
+    profile.headline = servicesText;
+  } else if (availabilityText) {
+    profile.headline = `${availabilityText} availability`;
+  }
+
+  if (servicesText && availabilityText) {
+    profile.petFocus = `${servicesText} • ${availabilityText}`;
+  } else {
+    profile.petFocus = servicesText || availabilityText || '';
+  }
+
+  return profile;
+}
+
+function applyActiveSitterProfile(options = {}) {
+  if (!activeSitterAccount?.id) {
+    return null;
+  }
+
+  const sitter = sitters.find((entry) => entry.id === activeSitterAccount.id);
+
+  if (!sitter) {
+    return null;
+  }
+
+  const derivedProfile = buildProfileFromSitter(sitter);
+
+  if (!derivedProfile) {
+    return null;
+  }
+
+  if (userProfile?.backgroundCheck && userProfile?.sitterId === sitter.id) {
+    derivedProfile.backgroundCheck = userProfile.backgroundCheck;
+  }
+
+  userProfile = derivedProfile;
+  saveStoredData(STORAGE_KEYS.PROFILE, userProfile);
+
+  if (!options.silent) {
+    renderProfile(userProfile);
+  }
+
+  return userProfile;
+}
+
+function clearStoredProfileData() {
+  userProfile = null;
+
+  try {
+    localStorage.removeItem(STORAGE_KEYS.PROFILE);
+  } catch (error) {
+    console.warn('Unable to remove profile from storage', error);
+  }
+
+  renderProfile(null);
+  backgroundCheckInProgress = false;
+
+  if (profileForm) {
+    profileForm.reset();
+  }
+
+  if (profileMessage) {
+    profileMessage.textContent = '';
+    profileMessage.classList.add('hidden');
+  }
+}
+
 function logoutActiveSitter(options = {}) {
   if (!activeSitterAccount) {
     updateHeaderAuthButton();
@@ -330,20 +420,7 @@ function logoutActiveSitter(options = {}) {
 function handleProfileLogout() {
   setProfileMenuOpen(false);
   logoutActiveSitter({ silent: true });
-  userProfile = null;
-
-  try {
-    localStorage.removeItem(STORAGE_KEYS.PROFILE);
-  } catch (error) {
-    console.warn('Unable to remove profile from storage', error);
-  }
-
-  renderProfile(null);
-  backgroundCheckInProgress = false;
-
-  if (profileForm) {
-    profileForm.reset();
-  }
+  clearStoredProfileData();
 
   if (profileMessage) {
     profileMessage.textContent =
@@ -1857,6 +1934,10 @@ if (
   saveStoredData(STORAGE_KEYS.ACTIVE_SITTER, null);
 }
 
+if (activeSitterAccount?.id) {
+  applyActiveSitterProfile({ silent: true });
+}
+
 initializeAdminControls();
 
 if (sitterFilters) {
@@ -1878,6 +1959,7 @@ headerAuthButton?.addEventListener('click', () => {
   const action = headerAuthButton.dataset.state;
   if (action === 'logout') {
     logoutActiveSitter();
+    clearStoredProfileData();
   } else {
     const loginUrl = new URL('index.html#sitter-login', window.location.href);
     window.location.href = loginUrl.toString();
@@ -2527,6 +2609,7 @@ loginForms.forEach((form) => {
     };
     saveStoredData(STORAGE_KEYS.ACTIVE_SITTER, activeSitterAccount);
     updateHeaderAuthButton();
+    applyActiveSitterProfile();
 
     setFormMessage(messageElement, 'Logging you in…', 'info');
 
@@ -2647,6 +2730,10 @@ profileForm?.addEventListener('submit', (event) => {
 
   if (userProfile?.backgroundCheck) {
     profile.backgroundCheck = userProfile.backgroundCheck;
+  }
+
+  if (userProfile?.sitterId) {
+    profile.sitterId = userProfile.sitterId;
   }
 
   saveStoredData(STORAGE_KEYS.PROFILE, profile);

@@ -102,6 +102,27 @@ a:focus {
   margin-left: 1.25rem;
 }
 
+.header-signup-link {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--green-dark);
+  white-space: nowrap;
+}
+
+.header-signup-link:hover,
+.header-signup-link:focus {
+  color: var(--green);
+}
+
+[data-theme='dark'] .header-signup-link {
+  color: var(--green);
+}
+
+[data-theme='dark'] .header-signup-link:hover,
+[data-theme='dark'] .header-signup-link:focus {
+  color: var(--green-dark);
+}
+
 .header-auth-button {
   padding: 0.6rem 1.4rem;
   font-size: 0.95rem;
