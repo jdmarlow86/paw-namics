@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" role="img" aria-labelledby="title desc">
+  <title id="title">Happy pets illustration</title>
+  <desc id="desc">A cheerful dog and cat sitting together inside a heart</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2ecb70" />
+      <stop offset="100%" stop-color="#1b8f4b" />
+    </linearGradient>
+    <linearGradient id="pet" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#f7f7f7" stop-opacity="0.85" />
+    </linearGradient>
+  </defs>
+  <rect width="320" height="200" rx="24" fill="url(#bg)" />
+  <g transform="translate(160 105)">
+    <path
+      d="M-90 -30c0-28 22-50 50-50 18 0 34 9 43 23 9-14 25-23 43-23 28 0 50 22 50 50 0 52-93 110-93 110S-90 22-90-30z"
+      fill="#145d33"
+      opacity="0.25"
+    />
+  </g>
+  <g transform="translate(110 104)">
+    <path
+      d="M-34 -18c-8 0-15 6-15 14v34c0 5 4 9 9 9h33c5 0 9-4 9-9v-20c0-16-12-28-27-28h-9z"
+      fill="url(#pet)"
+      stroke="#145d33"
+      stroke-width="4"
+      stroke-linejoin="round"
+    />
+    <circle cx="-24" cy="0" r="4" fill="#145d33" />
+    <circle cx="-6" cy="0" r="4" fill="#145d33" />
+    <path d="M-15 10c0 4-4 7-9 7" stroke="#f47c4c" stroke-width="4" stroke-linecap="round" />
+    <path d="M-47 -10l-6 -12m19 6l-6 -12" stroke="#f9d45c" stroke-width="6" stroke-linecap="round" />
+    <path d="M-47 -14c-6 2-9 7-9 12 0 6 4 10 10 10" stroke="#145d33" stroke-width="4" stroke-linecap="round" />
+  </g>
+  <g transform="translate(200 118)">
+    <path
+      d="M-24 -34c-16 0-28 13-28 30v16c0 7 6 12 12 12h36c7 0 12-5 12-12v-18c0-16-12-28-28-28h-4z"
+      fill="url(#pet)"
+      stroke="#145d33"
+      stroke-width="4"
+      stroke-linejoin="round"
+    />
+    <circle cx="-18" cy="-6" r="4" fill="#145d33" />
+    <circle cx="0" cy="-6" r="4" fill="#145d33" />
+    <path d="M-12 6c4 4 10 4 14 0" stroke="#f47c4c" stroke-width="4" stroke-linecap="round" />
+    <path d="M-32 -38l-6 -14m40 14l6 -14" stroke="#f9d45c" stroke-width="6" stroke-linecap="round" />
+    <path d="M-42 -24c-4 4-6 9-6 15 0 7 4 14 12 16" stroke="#145d33" stroke-width="4" stroke-linecap="round" />
+    <path d="M20 -12c4 4 6 9 6 15 0 8-4 15-12 18" stroke="#145d33" stroke-width="4" stroke-linecap="round" />
+  </g>
+  <g transform="translate(160 164)">
+    <ellipse cx="0" cy="0" rx="72" ry="16" fill="#0b3b22" opacity="0.25" />
+  </g>
+</svg>
