@@ -173,7 +173,12 @@
               <li>Co-branded marketing campaigns</li>
             </ul>
           </div>
-          <form id="affiliate-form" class="card form-grid">
+          <form
+            id="affiliate-form"
+            class="card form-grid"
+            action="https://formspree.io/f/pawnamics.contact@gmail.com"
+            method="POST"
+          >
             <h3 class="full">Apply to Become an Affiliate</h3>
             <label>
               Company Name
@@ -275,16 +280,5 @@
     </div>
 
     <script src="script.js"></script>
-    <script>
-      document
-        .getElementById('affiliate-form')
-        ?.addEventListener('submit', function (event) {
-          event.preventDefault();
-          const button = this.querySelector('button');
-          button.disabled = true;
-          button.textContent = 'Application Sent!';
-          this.reset();
-        });
-    </script>
   </body>
 </html>
