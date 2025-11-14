@@ -24,6 +24,13 @@
           >
             Log In
           </button>
+          <a
+            class="btn btn-light header-signup-link"
+            href="index.html#sitter-signup"
+            data-signup-link
+          >
+            Sign Up
+          </a>
           <button
             class="nav-toggle"
             type="button"
@@ -208,6 +215,74 @@
                 <p
                   class="form-message hidden"
                   data-login-message
+                  role="status"
+                  aria-live="polite"
+                ></p>
+              </form>
+            </article>
+            <article class="card auth-card" id="sitter-signup">
+              <h3>Create a new sitter account</h3>
+              <p>
+                New here? Sign up below to save your details and start building
+                a sitter profile that pet parents can trust.
+              </p>
+              <form data-sitter-signup-form autocomplete="on" class="form-grid single-column">
+                <label>
+                  Full name
+                  <input
+                    type="text"
+                    name="name"
+                    autocomplete="name"
+                    placeholder="Jamie Rivera"
+                    required
+                  />
+                </label>
+                <label>
+                  Email address
+                  <input
+                    type="email"
+                    name="email"
+                    autocomplete="email"
+                    placeholder="you@example.com"
+                    required
+                  />
+                </label>
+                <label>
+                  Choose a username
+                  <input
+                    type="text"
+                    name="username"
+                    autocomplete="username"
+                    placeholder="jamie-rivera"
+                    required
+                  />
+                </label>
+                <label>
+                  Create a password
+                  <input
+                    type="password"
+                    name="password"
+                    autocomplete="new-password"
+                    placeholder="At least 6 characters"
+                    minlength="6"
+                    required
+                  />
+                </label>
+                <label>
+                  Confirm password
+                  <input
+                    type="password"
+                    name="confirmPassword"
+                    autocomplete="new-password"
+                    placeholder="Repeat your password"
+                    minlength="6"
+                    required
+                  />
+                </label>
+                <button type="submit" class="btn">Sign Up</button>
+                <p
+                  class="form-message hidden"
+                  data-signup-message
                   role="status"
                   aria-live="polite"
                 ></p>
