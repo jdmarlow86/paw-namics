@@ -68,6 +68,14 @@ const sitterServicesElement = document.querySelector('[data-sitter-services]');
 const sitterBioElement = document.querySelector('[data-sitter-bio]');
 const sitterPhotoElement = document.querySelector('[data-sitter-photo]');
 const sitterRatesElement = document.querySelector('[data-sitter-rates]');
+const sitterAuthMessageElement = document.querySelector('[data-sitter-auth-message]');
+const sitterAuthDefaultMessage =
+  sitterAuthMessageElement?.dataset?.defaultMessage?.trim() ||
+  sitterAuthMessageElement?.textContent?.trim() ||
+  'Log in to manage your PawNamics sitter profile or create a new account to get started.';
+const sitterAuthMissingMessage =
+  sitterAuthMessageElement?.dataset?.missingMessage?.trim() ||
+  'We couldn’t find that sitter profile. Log in or create a new account below to continue.';
 const subscriptionForm = document.querySelector('[data-subscription-form]');
 const subscriptionTotal = document.querySelector('[data-subscription-total]');
 const subscriptionMessage = document.querySelector('[data-subscription-message]');
@@ -1777,22 +1785,48 @@ function toggleSitterProfileVisibility(showProfile) {
   }
 }
 
-function renderSitterProfilePage() {
-  if (!sitterProfileSection) return;
-
-  const params = new URLSearchParams(window.location.search);
-  let sitterId = params.get('id');
-
-  if (!sitterId && activeSitterAccount?.id) {
-    sitterId = activeSitterAccount.id;
+function updateSitterAuthMessage(messageType = 'default') {
+  if (!sitterAuthMessageElement) {
+    return;
   }
 
-  if (!sitterId) {
+  const message = messageType === 'missing'
+    ? sitterAuthMissingMessage
+    : sitterAuthDefaultMessage;
+
+  sitterAuthMessageElement.textContent = message;
+}
+
+function renderSitterProfilePage() {
+  if (!sitterProfileSection && !sitterProfileEmpty) return;
+
+  const isLoggedIn = Boolean(activeSitterAccount?.id);
+
+  if (!isLoggedIn) {
+    updateSitterAuthMessage('default');
     toggleSitterProfileVisibility(false);
     activeSitterProfileId = null;
     activeSitterProfileName = '';
     if (typeof document !== 'undefined') {
-      document.title = 'Sitter Profile | PawNamics';
+      document.title = 'Access Your Sitter Profile | PawNamics';
+    }
+    return;
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  let sitterId = params.get('id');
+
+  if (!sitterId) {
+    sitterId = activeSitterAccount.id;
+  }
+
+  if (!sitterId) {
+    updateSitterAuthMessage('missing');
+    toggleSitterProfileVisibility(false);
+    activeSitterProfileId = null;
+    activeSitterProfileName = '';
+    if (typeof document !== 'undefined') {
+      document.title = 'Access Your Sitter Profile | PawNamics';
     }
     return;
   }
@@ -1800,11 +1834,12 @@ function renderSitterProfilePage() {
   const sitter = sitters.find((entry) => entry.id === sitterId);
 
   if (!sitter) {
+    updateSitterAuthMessage('missing');
     toggleSitterProfileVisibility(false);
     activeSitterProfileId = null;
     activeSitterProfileName = '';
     if (typeof document !== 'undefined') {
-      document.title = 'Sitter Profile | PawNamics';
+      document.title = 'Access Your Sitter Profile | PawNamics';
     }
     return;
   }
