@@ -307,12 +307,127 @@
         </div>
       </section>
 
-      <section class="section hidden" data-sitter-empty>
+      <section class="section section-alt hidden" data-sitter-empty>
         <div class="container">
+          <div class="section-header">
+            <h2>Access your PawNamics sitter tools</h2>
+            <p
+              class="section-subheading"
+              data-sitter-auth-message
+              data-default-message="Log in to manage your PawNamics sitter profile or create a new account to get started."
+              data-missing-message="We couldn’t find that sitter profile. Log in or create a new account below to continue."
+            >
+              Log in to manage your PawNamics sitter profile or create a new account to get started.
+            </p>
+          </div>
+          <div class="grid two-col" data-sitter-auth-section>
+            <article class="card auth-card" id="sitter-login">
+              <h3>Log in to your profile</h3>
+              <p>
+                Enter the credentials you have saved to open your profile instantly.
+              </p>
+              <form data-sitter-login-form autocomplete="on" class="form-grid single-column">
+                <label>
+                  Username
+                  <input
+                    type="text"
+                    name="username"
+                    required
+                    autocomplete="username"
+                    placeholder="jane-doe"
+                  />
+                </label>
+                <label>
+                  Password
+                  <input
+                    type="password"
+                    name="password"
+                    required
+                    autocomplete="current-password"
+                    placeholder="Your password"
+                  />
+                </label>
+                <button type="submit" class="btn">Log In</button>
+                <p
+                  class="form-message hidden"
+                  data-login-message
+                  role="status"
+                  aria-live="polite"
+                ></p>
+              </form>
+            </article>
+            <article class="card auth-card" id="sitter-signup">
+              <h3>Create a new sitter account</h3>
+              <p>
+                New here? Sign up below to save your details and start building a sitter profile that pet parents can trust.
+              </p>
+              <form data-sitter-signup-form autocomplete="on" class="form-grid single-column">
+                <label>
+                  Full name
+                  <input
+                    type="text"
+                    name="name"
+                    autocomplete="name"
+                    placeholder="Jamie Rivera"
+                    required
+                  />
+                </label>
+                <label>
+                  Email address
+                  <input
+                    type="email"
+                    name="email"
+                    autocomplete="email"
+                    placeholder="you@example.com"
+                    required
+                  />
+                </label>
+                <label>
+                  Choose a username
+                  <input
+                    type="text"
+                    name="username"
+                    autocomplete="username"
+                    placeholder="jamie-rivera"
+                    required
+                  />
+                </label>
+                <label>
+                  Create a password
+                  <input
+                    type="password"
+                    name="password"
+                    autocomplete="new-password"
+                    placeholder="At least 6 characters"
+                    minlength="6"
+                    required
+                  />
+                </label>
+                <label>
+                  Confirm password
+                  <input
+                    type="password"
+                    name="confirmPassword"
+                    autocomplete="new-password"
+                    placeholder="Repeat your password"
+                    minlength="6"
+                    required
+                  />
+                </label>
+                <button type="submit" class="btn">Sign Up</button>
+                <p
+                  class="form-message hidden"
+                  data-signup-message
+                  role="status"
+                  aria-live="polite"
+                ></p>
+              </form>
+            </article>
+          </div>
           <div class="card empty-state">
-            <h2>We couldn’t find that sitter.</h2>
+            <h3>Need to explore other sitters?</h3>
             <p>
-              Double-check your link or head back to the directory to explore more pet care pros. Ready to build your own listing?
+              Browse the PawNamics directory to find trusted care in your area or contact us for personalized recommendations.
             </p>
             <div class="card-actions">
               <a class="btn" href="index.html#available-sitters">Browse sitters</a>
