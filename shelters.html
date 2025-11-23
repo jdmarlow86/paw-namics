@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Local Shelters | PawNamics</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-content">
+        <a class="logo" href="index.html">PawNamics</a>
+        <div class="header-controls">
+          <button
+            class="btn btn-outline header-auth-button"
+            type="button"
+            data-auth-button
+          >
+            Log In
+          </button>
+          <a
+            class="btn btn-light header-signup-link"
+            href="index.html#sitter-signup"
+            data-signup-link
+          >
+            Sign Up
+          </a>
+          <button
+            class="nav-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="primary-navigation"
+            data-nav-toggle
+          >
+            <span class="sr-only">Toggle navigation</span>
+            <span class="nav-toggle-icon" aria-hidden="true"></span>
+          </button>
+          <div class="profile-menu hidden" data-profile-menu>
+            <button
+              class="profile-menu-trigger"
+              type="button"
+              aria-haspopup="true"
+              aria-expanded="false"
+              data-profile-menu-trigger
+            >
+              <span class="sr-only">Open account menu</span>
+              <img
+                src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=200&q=80"
+                alt="Your profile avatar"
+                data-profile-menu-avatar
+              />
+            </button>
+            <div class="profile-menu-dropdown" role="menu" data-profile-menu-dropdown>
+              <a
+                class="profile-menu-item"
+                href="sitter-profile.html"
+                role="menuitem"
+                data-profile-menu-edit
+                >View profile</a
+              >
+              <button class="profile-menu-item" type="button" role="menuitem" data-profile-menu-settings>
+                Settings
+              </button>
+              <button class="profile-menu-item" type="button" role="menuitem" data-profile-menu-logout>
+                Log out
+              </button>
+            </div>
+          </div>
+        </div>
+        <nav class="main-nav" id="primary-navigation" data-nav>
+          <a href="index.html">Home</a>
+          <a href="about.html">About</a>
+          <a href="affiliate.html">Affiliates</a>
+          <a href="sitter-profile.html">Sitter Profile</a>
+          <a href="contact.html">Contact</a>
+          <a href="support.html">Support</a>
+          <a href="shelters.html" aria-current="page">Shelters</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero hero-shelters">
+        <div class="container hero-content">
+          <div>
+            <h1>Find and support nearby animal shelters</h1>
+            <p>
+              Explore community shelters close to you, register your own profile, and use flexible filters to discover the perfect partners for adoption, fostering, or volunteering.
+            </p>
+            <div class="hero-actions">
+              <a class="btn" href="#shelter-map">View map</a>
+              <a class="btn btn-outline" href="#shelter-registration">Register your shelter</a>
+            </div>
+          </div>
+          <img
+            src="https://images.unsplash.com/photo-1507146426996-ef05306b995a?auto=format&fit=crop&w=700&q=80"
+            alt="Volunteer with a rescue dog"
+          />
+        </div>
+      </section>
+
+      <section id="shelter-map" class="section">
+        <div class="container">
+          <div class="section-header">
+            <h2>Shelters near your location</h2>
+            <p>Allow location access to personalize the map and distance filters.</p>
+          </div>
+          <div class="grid two-col responsive-gap">
+            <article class="card map-card">
+              <div class="map-header">
+                <div>
+                  <p class="eyebrow">Live map</p>
+                  <h3>Local shelter pins</h3>
+                </div>
+                <div class="map-actions">
+                  <button type="button" class="btn btn-outline" data-shelter-locate>
+                    Use my location
+                  </button>
+                  <button type="button" class="btn btn-ghost" data-shelter-reset>
+                    Reset map
+                  </button>
+                </div>
+              </div>
+              <div class="map-embed" data-map-container>
+                <iframe
+                  title="Map of nearby shelters"
+                  loading="lazy"
+                  data-shelter-map
+                  src="https://www.openstreetmap.org/export/embed.html?bbox=-74.1%2C40.67%2C-73.85%2C40.85&layer=mapnik&marker=40.75%2C-73.97"
+                  allowfullscreen
+                  referrerpolicy="no-referrer-when-downgrade"
+                ></iframe>
+              </div>
+              <p class="status-message" data-shelter-location-status>
+                Using a default view while we determine your location.
+              </p>
+            </article>
+
+            <article class="card">
+              <div class="section-header card-header-inline">
+                <div>
+                  <p class="eyebrow">Filters</p>
+                  <h3>Editable options</h3>
+                </div>
+                <p class="muted" data-shelter-filter-summary>Showing all shelters.</p>
+              </div>
+              <form class="form-grid" data-shelter-filters>
+                <label>
+                  Search
+                  <input
+                    type="search"
+                    name="search"
+                    placeholder="Shelter name or city"
+                    autocomplete="off"
+                  />
+                </label>
+                <label class="range-label">
+                  Max distance
+                  <div class="range-row">
+                    <input
+                      type="range"
+                      name="distance"
+                      min="5"
+                      max="250"
+                      step="5"
+                      value="50"
+                      data-shelter-distance
+                    />
+                    <span class="tag" data-shelter-distance-label>50 miles</span>
+                  </div>
+                </label>
+                <div class="checkbox-group">
+                  <p class="checkbox-group-title">Services</p>
+                  <label class="checkbox">
+                    <input type="checkbox" name="services" value="Adoption" />
+                    Adoption support
+                  </label>
+                  <label class="checkbox">
+                    <input type="checkbox" name="services" value="Foster" />
+                    Foster placements
+                  </label>
+                  <label class="checkbox">
+                    <input type="checkbox" name="services" value="Medical" />
+                    Medical care
+                  </label>
+                  <label class="checkbox">
+                    <input type="checkbox" name="services" value="Behavior" />
+                    Training & behavior
+                  </label>
+                </div>
+                <div class="checkbox-group">
+                  <p class="checkbox-group-title">Programs</p>
+                  <label class="checkbox">
+                    <input type="checkbox" name="programs" value="Volunteer" />
+                    Accepting volunteers
+                  </label>
+                  <label class="checkbox">
+                    <input type="checkbox" name="programs" value="Clinic" />
+                    Low-cost clinic
+                  </label>
+                  <label class="checkbox">
+                    <input type="checkbox" name="programs" value="Community" />
+                    Community outreach
+                  </label>
+                </div>
+                <label>
+                  Add custom filter
+                  <div class="input-row">
+                    <input
+                      type="text"
+                      name="customFilter"
+                      placeholder="e.g. senior dogs"
+                      data-shelter-custom-filter
+                    />
+                    <button type="button" class="btn btn-outline" data-add-custom-filter>
+                      Add
+                    </button>
+                  </div>
+                  <span class="muted small-text">Use custom tags to refine results. You can edit or remove them anytime.</span>
+                </label>
+                <div class="chip-row" data-shelter-custom-filters></div>
+                <div class="filter-actions">
+                  <button type="reset" class="btn btn-ghost">Clear</button>
+                  <button type="submit" class="btn">Apply filters</button>
+                </div>
+              </form>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-alt">
+        <div class="container">
+          <div class="section-header">
+            <div>
+              <p class="eyebrow">Matches</p>
+              <h2>Shelter directory</h2>
+            </div>
+            <p class="muted">Tap a card to expand details and contact info.</p>
+          </div>
+          <div class="card-grid" data-shelter-list></div>
+          <p class="note" data-shelter-empty hidden>
+            No shelters match your current filters. Adjust the distance or remove a custom tag to see more options.
+          </p>
+        </div>
+      </section>
+
+      <section id="shelter-registration" class="section">
+        <div class="container">
+          <div class="grid two-col responsive-gap">
+            <div>
+              <p class="eyebrow">For organizations</p>
+              <h2>Register your shelter profile</h2>
+              <p>
+                Share your mission, highlight services, and get discovered by nearby pet lovers. We’ll review submissions and follow up with onboarding steps.
+              </p>
+              <ul class="checklist">
+                <li>List key services and volunteer programs</li>
+                <li>Customize discovery filters for your location</li>
+                <li>Invite staff to collaborate on your profile</li>
+              </ul>
+            </div>
+            <article class="card">
+              <h3>Submit a shelter</h3>
+              <form class="form-grid single-column" data-shelter-registration-form>
+                <label>
+                  Shelter name
+                  <input type="text" name="name" required placeholder="Happy Tails Rescue" />
+                </label>
+                <label>
+                  Contact email
+                  <input type="email" name="email" required placeholder="hello@happytails.org" />
+                </label>
+                <label>
+                  City & state
+                  <input type="text" name="location" required placeholder="Portland, OR" />
+                </label>
+                <label>
+                  Focus areas
+                  <input type="text" name="focus" placeholder="Adoption, foster support, vet clinic" />
+                </label>
+                <label>
+                  Website (optional)
+                  <input type="url" name="website" placeholder="https://" />
+                </label>
+                <label>
+                  Additional notes
+                  <textarea name="notes" rows="3" placeholder="Share capacity, volunteer needs, or preferred contact details."></textarea>
+                </label>
+                <button type="submit" class="btn">Create shelter profile</button>
+                <p class="status-message" role="status" aria-live="polite" data-shelter-registration-status></p>
+              </form>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-content">
+        <div>
+          <h3>PawNamics</h3>
+          <p>Trusted pet care, sitter tools, and rescue support in one place.</p>
+        </div>
+        <div class="footer-links">
+          <a href="about.html">About</a>
+          <a href="affiliate.html">Affiliates</a>
+          <a href="contact.html">Contact</a>
+          <a href="support.html">Support</a>
+          <a href="shelters.html" aria-current="page">Shelters</a>
+        </div>
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
