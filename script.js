@@ -144,6 +144,80 @@ let adminModeEnabled = false;
 let adminStatusOverride = '';
 let adminStatusState = 'info';
 
+const shelterMapFrame = document.querySelector('[data-shelter-map]');
+const shelterLocationStatus = document.querySelector('[data-shelter-location-status]');
+const shelterFilterForm = document.querySelector('[data-shelter-filters]');
+const shelterDistanceInput = shelterFilterForm?.querySelector('[data-shelter-distance]');
+const shelterDistanceLabel = shelterFilterForm?.querySelector('[data-shelter-distance-label]');
+const shelterCustomFilterInput = shelterFilterForm?.querySelector('[data-shelter-custom-filter]');
+const shelterAddCustomFilterButton = shelterFilterForm?.querySelector('[data-add-custom-filter]');
+const shelterCustomFiltersContainer = document.querySelector('[data-shelter-custom-filters]');
+const shelterListElement = document.querySelector('[data-shelter-list]');
+const shelterEmptyState = document.querySelector('[data-shelter-empty]');
+const shelterFilterSummary = document.querySelector('[data-shelter-filter-summary]');
+const shelterRegistrationForm = document.querySelector('[data-shelter-registration-form]');
+const shelterRegistrationStatus = document.querySelector('[data-shelter-registration-status]');
+const shelterLocateButton = document.querySelector('[data-shelter-locate]');
+const shelterResetButton = document.querySelector('[data-shelter-reset]');
+
+const SHELTER_FALLBACK_COORDS = { lat: 40.75, lng: -73.97, label: 'Midtown Manhattan' };
+const SHELTER_MAP_DELTA = 0.22;
+
+const shelterDirectory = [
+  {
+    name: 'Harbor Haven Rescue',
+    city: 'Brooklyn, NY',
+    services: ['Adoption', 'Foster', 'Medical'],
+    programs: ['Volunteer', 'Community'],
+    tags: ['cats', 'neonates', 'trap-neuter-return'],
+    distanceLabel: 'Base',
+    coords: { lat: 40.6782, lng: -73.9442 },
+  },
+  {
+    name: 'North Star Animal Alliance',
+    city: 'Jersey City, NJ',
+    services: ['Adoption', 'Behavior', 'Medical'],
+    programs: ['Volunteer', 'Clinic'],
+    tags: ['small dogs', 'training', 'veterinary'],
+    coords: { lat: 40.7282, lng: -74.0776 },
+  },
+  {
+    name: 'Riverbend Humane Society',
+    city: 'Hoboken, NJ',
+    services: ['Adoption', 'Foster'],
+    programs: ['Volunteer'],
+    tags: ['families', 'bonded pairs'],
+    coords: { lat: 40.743, lng: -74.0324 },
+  },
+  {
+    name: 'Paws & Hearts Collective',
+    city: 'Queens, NY',
+    services: ['Adoption', 'Behavior'],
+    programs: ['Community'],
+    tags: ['behavior help', 'urban pets'],
+    coords: { lat: 40.7282, lng: -73.7949 },
+  },
+  {
+    name: 'Evergreen Animal Refuge',
+    city: 'Staten Island, NY',
+    services: ['Adoption', 'Foster', 'Medical'],
+    programs: ['Volunteer', 'Clinic'],
+    tags: ['senior dogs', 'medical cases'],
+    coords: { lat: 40.5795, lng: -74.1502 },
+  },
+  {
+    name: 'Hudson Valley Pet Haven',
+    city: 'White Plains, NY',
+    services: ['Adoption', 'Behavior'],
+    programs: ['Volunteer', 'Community'],
+    tags: ['farm cats', 'behavior support'],
+    coords: { lat: 41.033, lng: -73.764 },
+  },
+];
+
+let userShelterLocation = { ...SHELTER_FALLBACK_COORDS };
+let shelterCustomFilters = [];
+
 function setProfileMenuOpen(open) {
   if (!profileMenu || !profileMenuTrigger) {
     profileMenuOpen = false;
@@ -3057,3 +3131,326 @@ settingsForm?.addEventListener('submit', (event) => {
 });
 
 applySettingsToForm();
+
+function buildShelterMapUrl(lat, lng) {
+  const bbox = [
+    (lng - SHELTER_MAP_DELTA).toFixed(4),
+    (lat - SHELTER_MAP_DELTA).toFixed(4),
+    (lng + SHELTER_MAP_DELTA).toFixed(4),
+    (lat + SHELTER_MAP_DELTA).toFixed(4),
+  ];
+
+  return `https://www.openstreetmap.org/export/embed.html?bbox=${bbox.join('%2C')}&layer=mapnik&marker=${lat.toFixed(
+    4
+  )}%2C${lng.toFixed(4)}`;
+}
+
+function calculateDistanceMiles(from, to) {
+  if (!from || !to) return Number.POSITIVE_INFINITY;
+
+  const earthRadiusMiles = 3958.8;
+  const dLat = ((to.lat - from.lat) * Math.PI) / 180;
+  const dLon = ((to.lng - from.lng) * Math.PI) / 180;
+  const lat1 = (from.lat * Math.PI) / 180;
+  const lat2 = (to.lat * Math.PI) / 180;
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return earthRadiusMiles * c;
+}
+
+function updateShelterMap(location, message) {
+  if (!shelterMapFrame) return;
+
+  const mapUrl = buildShelterMapUrl(location.lat, location.lng);
+  shelterMapFrame.src = mapUrl;
+
+  if (shelterLocationStatus) {
+    shelterLocationStatus.textContent = message || 'Map updated with your current view.';
+  }
+}
+
+function updateShelterDistanceLabel() {
+  if (!shelterDistanceInput || !shelterDistanceLabel) return;
+  shelterDistanceLabel.textContent = `${shelterDistanceInput.value} miles`;
+}
+
+function renderShelterCustomFilters() {
+  if (!shelterCustomFiltersContainer) return;
+
+  shelterCustomFiltersContainer.innerHTML = '';
+
+  shelterCustomFilters.forEach((tag, index) => {
+    const chip = document.createElement('span');
+    chip.className = 'chip';
+    chip.innerHTML = `
+      <span>${tag}</span>
+      <button type="button" aria-label="Remove ${tag}" data-remove-custom-filter="${index}">×</button>
+    `;
+    shelterCustomFiltersContainer.appendChild(chip);
+  });
+}
+
+function handleShelterCustomFilterClick(event) {
+  const target = event.target;
+  if (!(target instanceof HTMLElement)) return;
+  const removeIndex = target.dataset.removeCustomFilter;
+  if (typeof removeIndex === 'undefined') return;
+  const parsedIndex = Number(removeIndex);
+  if (Number.isNaN(parsedIndex)) return;
+  shelterCustomFilters.splice(parsedIndex, 1);
+  renderShelterCustomFilters();
+  applyShelterFilters();
+}
+
+function getShelterFilters() {
+  if (!shelterFilterForm) {
+    return {
+      search: '',
+      distance: 0,
+      services: [],
+      programs: [],
+      customTags: shelterCustomFilters.slice(),
+    };
+  }
+
+  const formData = new FormData(shelterFilterForm);
+  const search = (formData.get('search') || '').toString().trim();
+  const distance = Number(formData.get('distance')) || 0;
+  const services = formData.getAll('services').map((service) => service.toString());
+  const programs = formData.getAll('programs').map((program) => program.toString());
+
+  return {
+    search,
+    distance,
+    services,
+    programs,
+    customTags: shelterCustomFilters.slice(),
+  };
+}
+
+function summarizeShelterFilters(filters, count) {
+  if (!shelterFilterSummary) return;
+
+  const parts = [];
+  if (filters.search) {
+    parts.push(`matching “${filters.search}”`);
+  }
+  if (filters.services.length) {
+    parts.push(`services: ${filters.services.join(', ')}`);
+  }
+  if (filters.programs.length) {
+    parts.push(`programs: ${filters.programs.join(', ')}`);
+  }
+  if (filters.customTags.length) {
+    parts.push(`custom tags: ${filters.customTags.join(', ')}`);
+  }
+
+  const countLabel = typeof count === 'number' ? `${count} shelter${count === 1 ? '' : 's'}` : 'Shelters';
+  shelterFilterSummary.textContent = parts.length
+    ? `${countLabel} filtered by ${parts.join(' • ')}.`
+    : `Showing ${countLabel}.`;
+}
+
+function filterShelterDirectory(filters) {
+  return shelterDirectory
+    .map((shelter) => {
+      const distance = calculateDistanceMiles(userShelterLocation, shelter.coords);
+      return { ...shelter, distance };
+    })
+    .filter((shelter) => {
+      const searchTarget = `${shelter.name} ${shelter.city}`.toLowerCase();
+      const searchMatch = filters.search
+        ? searchTarget.includes(filters.search.toLowerCase())
+        : true;
+
+      const servicesMatch = filters.services.every((service) =>
+        shelter.services.map((item) => item.toLowerCase()).includes(service.toLowerCase())
+      );
+
+      const programsMatch = filters.programs.every((program) =>
+        shelter.programs.map((item) => item.toLowerCase()).includes(program.toLowerCase())
+      );
+
+      const tagsMatch = filters.customTags.every((tag) =>
+        shelter.tags.some((item) => item.toLowerCase().includes(tag.toLowerCase()))
+      );
+
+      const withinDistance = filters.distance
+        ? shelter.distance <= filters.distance
+        : true;
+
+      return searchMatch && servicesMatch && programsMatch && tagsMatch && withinDistance;
+    })
+    .sort((a, b) => a.distance - b.distance);
+}
+
+function renderShelterCards(list) {
+  if (!shelterListElement) return;
+
+  shelterListElement.innerHTML = '';
+
+  if (!list.length) {
+    shelterEmptyState?.removeAttribute('hidden');
+    return;
+  }
+
+  shelterEmptyState?.setAttribute('hidden', '');
+
+  list.forEach((shelter) => {
+    const card = document.createElement('article');
+    card.className = 'card';
+
+    const distanceLabel = Number.isFinite(shelter.distance)
+      ? `${shelter.distance.toFixed(1)} miles away`
+      : 'Distance unavailable';
+
+    card.innerHTML = `
+      <div class="card-header-inline">
+        <div>
+          <p class="eyebrow">${shelter.city}</p>
+          <h3>${shelter.name}</h3>
+        </div>
+        <span class="tag">${distanceLabel}</span>
+      </div>
+      <p class="muted">Programs: ${shelter.programs.join(', ')}</p>
+      <div class="chip-row">
+        ${shelter.services.map((service) => `<span class="tag">${service}</span>`).join('')}
+      </div>
+      <p class="note">Focus: ${shelter.tags.join(', ')}</p>
+    `;
+
+    shelterListElement.appendChild(card);
+  });
+}
+
+function applyShelterFilters() {
+  const filters = getShelterFilters();
+  const filtered = filterShelterDirectory(filters);
+  renderShelterCards(filtered);
+  summarizeShelterFilters(filters, filtered.length);
+}
+
+function addCustomShelterFilterFromInput() {
+  if (!shelterCustomFilterInput) return;
+
+  const value = shelterCustomFilterInput.value.trim();
+  if (!value) return;
+
+  const exists = shelterCustomFilters.some((tag) => tag.toLowerCase() === value.toLowerCase());
+  if (!exists) {
+    shelterCustomFilters.push(value);
+    renderShelterCustomFilters();
+    applyShelterFilters();
+  }
+
+  shelterCustomFilterInput.value = '';
+  shelterCustomFilterInput.focus();
+}
+
+function requestShelterLocation(isInitial = false) {
+  if (!navigator.geolocation) {
+    if (shelterLocationStatus) {
+      shelterLocationStatus.textContent = 'Location unavailable. Enter filters to refine results.';
+    }
+    return;
+  }
+
+  if (shelterLocationStatus) {
+    shelterLocationStatus.textContent = isInitial
+      ? 'Requesting your location...'
+      : 'Updating map with your location...';
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      userShelterLocation = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+        label: 'Your location',
+      };
+
+      updateShelterMap(userShelterLocation, 'Centered near your current location.');
+      applyShelterFilters();
+    },
+    () => {
+      if (shelterLocationStatus && !isInitial) {
+        shelterLocationStatus.textContent = 'Unable to access location. Using default map instead.';
+      }
+      resetShelterLocation();
+    },
+    { enableHighAccuracy: true, timeout: 8000 }
+  );
+}
+
+function resetShelterLocation() {
+  userShelterLocation = { ...SHELTER_FALLBACK_COORDS };
+  updateShelterMap(userShelterLocation, 'Showing default metro view.');
+  applyShelterFilters();
+}
+
+function handleShelterRegistrationSubmit(event) {
+  event.preventDefault();
+  if (!shelterRegistrationForm || !shelterRegistrationStatus) return;
+
+  shelterRegistrationStatus.textContent = 'Submitting your shelter profile...';
+  const formData = new FormData(shelterRegistrationForm);
+  const shelterName = (formData.get('name') || 'your shelter').toString();
+
+  window.setTimeout(() => {
+    shelterRegistrationStatus.textContent = `${shelterName} has been queued for review. We will reach out soon!`;
+    shelterRegistrationForm.reset();
+  }, 400);
+}
+
+function initShelterPage() {
+  if (shelterDistanceInput) {
+    shelterDistanceInput.addEventListener('input', () => {
+      updateShelterDistanceLabel();
+      applyShelterFilters();
+    });
+  }
+
+  shelterFilterForm?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    applyShelterFilters();
+  });
+
+  shelterFilterForm?.addEventListener('reset', () => {
+    shelterCustomFilters = [];
+    window.setTimeout(() => {
+      updateShelterDistanceLabel();
+      renderShelterCustomFilters();
+      applyShelterFilters();
+    }, 0);
+  });
+
+  shelterAddCustomFilterButton?.addEventListener('click', () => {
+    addCustomShelterFilterFromInput();
+  });
+
+    shelterCustomFilterInput?.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        addCustomShelterFilterFromInput();
+      }
+    });
+
+  shelterCustomFiltersContainer?.addEventListener('click', handleShelterCustomFilterClick);
+
+  shelterLocateButton?.addEventListener('click', () => requestShelterLocation(false));
+  shelterResetButton?.addEventListener('click', () => resetShelterLocation());
+  shelterRegistrationForm?.addEventListener('submit', handleShelterRegistrationSubmit);
+
+  updateShelterDistanceLabel();
+  renderShelterCustomFilters();
+  applyShelterFilters();
+  updateShelterMap(userShelterLocation);
+  requestShelterLocation(true);
+}
+
+if (shelterMapFrame || shelterFilterForm || shelterRegistrationForm) {
+  initShelterPage();
+}
