@@ -2564,6 +2564,7 @@ newsletterForm?.addEventListener('input', () => {
 
 sitterForm?.addEventListener('submit', async (event) => {
   event.preventDefault();
+  if (!sitterForm) return;
   const formData = new FormData(sitterForm);
   setFormMessage(sitterFormMessage, '');
 
@@ -2647,9 +2648,9 @@ sitterForm?.addEventListener('submit', async (event) => {
     name: sitterRecord.name || sitterRecord.username,
   };
   saveStoredData(STORAGE_KEYS.ACTIVE_SITTER, activeSitterAccount);
-  updateHeaderAuthButton();
+updateHeaderAuthButton();
   renderSitterDirectory();
-  sitterForm.reset();
+  sitterForm?.reset();
   resetSitterPhotoPreview();
   setFormMessage(
     sitterFormMessage,
@@ -2853,6 +2854,7 @@ loginForms.forEach((form) => {
 
 questionForm?.addEventListener('submit', (event) => {
   event.preventDefault();
+  if (!questionForm) return;
   const formData = new FormData(questionForm);
   const entry = {
     author: formData.get('author') || 'Anonymous',
@@ -2862,13 +2864,13 @@ questionForm?.addEventListener('submit', (event) => {
   questions.unshift(entry);
   saveStoredData(STORAGE_KEYS.QUESTIONS, questions);
   renderQuestions(questions);
-  questionForm.reset();
+  questionForm?.reset();
 });
 
 chatForm?.addEventListener('submit', (event) => {
   event.preventDefault();
 
-  if (!chatMessageInput) {
+  if (!chatForm || !chatMessageInput) {
     return;
   }
 
@@ -2946,6 +2948,7 @@ window.addEventListener('storage', (event) => {
 
 profileForm?.addEventListener('submit', (event) => {
   event.preventDefault();
+  if (!profileForm) return;
   const formData = new FormData(profileForm);
   const profile = Object.fromEntries(formData.entries());
 
